@@ -1,0 +1,4299 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0b1220">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>IMPORTANT DATA by AJEET PARMAR</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<meta name="application-name" content="IMPORTANT DATA">
+<meta name="apple-mobile-web-app-title" content="IMPORTANT DATA">
+<meta name="description" content="Secure personal data vault by AJEET PARMAR">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --bg: #0b1220;
+    --card: #152238;
+    --primary: #0ea5e9;
+    --primary-dark: #0284c7;
+    --accent: #38bdf8;
+    --danger: #f43f5e;
+    --success: #10b981;
+    --text: #f0f9ff;
+    --text-muted: #94a3b8;
+    --border: #1e3a5f;
+    --input-bg: #0f1c2e;
+    --header-bg: linear-gradient(135deg, #0b1220 0%, #152238 100%);
+  }
+  [data-theme="light"] {
+    --bg: #f0f7ff;
+    --card: #ffffff;
+    --primary: #0369a1;
+    --primary-dark: #075985;
+    --accent: #0284c7;
+    --danger: #e11d48;
+    --success: #059669;
+    --text: #0c4a6e;
+    --text-muted: #64748b;
+    --border: #bae6fd;
+    --input-bg: #e0f2fe;
+    --header-bg: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+    line-height: 1.5;
+    transition: background 0.3s, color 0.3s;
+    /* Prevent Chrome pull-to-refresh logout */
+    overscroll-behavior-y: contain;
+  }
+  .cf-multi-list {
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--input-bg);
+    margin-bottom: 8px;
+  }
+  .cf-multi-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .cf-multi-item:last-child { border-bottom: none; }
+  .cf-multi-item.selected { background: rgba(14,165,233,0.15); }
+  .cf-multi-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .cf-multi-num.empty {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: transparent;
+  }
+  .container { max-width: 480px; margin: 0 auto; padding: 16px; min-height: 100vh; padding-bottom: 90px; }
+  
+  #lock-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px;
+    text-align: center;
+  }
+  .lock-icon { font-size: 64px; margin-bottom: 16px; }
+  .app-title { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+  .app-brand { font-size: 13px; color: var(--primary); font-weight: 600; letter-spacing: 1px; margin-bottom: 8px; }
+  .app-subtitle { color: var(--text-muted); margin-bottom: 32px; font-size: 15px; }
+  
+  .form-group { margin-bottom: 16px; text-align: left; width: 100%; }
+  label { display: block; font-size: 13px; color: var(--text); margin-bottom: 6px; font-weight: 700; }
+  .field-label-bold { font-weight: 700 !important; color: var(--text) !important; }
+  input, textarea, select {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+  textarea { min-height: 90px; resize: vertical; }
+  
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:active { background: var(--primary-dark); transform: scale(0.98); }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-sm { padding: 8px 14px; font-size: 13px; width: auto; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0 16px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
+  .header-actions { display: flex; gap: 8px; }
+  
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px));
+    z-index: 60;
+  }
+  .bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 6px 4px;
+    cursor: pointer;
+  }
+  .bottom-nav-item .nav-icon { font-size: 20px; line-height: 1; }
+  .bottom-nav-item.active { color: var(--primary); }
+  .bottom-nav-item:active { opacity: 0.7; }
+  
+  .container { padding-bottom: 100px !important; }
+  
+  .entry-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .entry-card:active { transform: scale(0.98); }
+  .entry-card.needs-category {
+    border: 1.5px solid #f59e0b;
+    background: linear-gradient(135deg, rgba(245,158,11,0.12) 0%, var(--card) 60%);
+    box-shadow: 0 0 0 1px rgba(245,158,11,0.25);
+  }
+  [data-theme="light"] .entry-card.needs-category {
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 60%);
+    border-color: #f59e0b;
+  }
+  .needs-cat-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #f59e0b;
+    color: #111;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .entry-title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+  .entry-meta { font-size: 13px; color: var(--text-muted); }
+  .entry-username { font-size: 14px; color: var(--primary); margin-top: 4px; }
+  .entry-card-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .entry-card-body { flex: 1; min-width: 0; }
+  .reorder-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .reorder-btn {
+    width: 32px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .reorder-btn:active { background: var(--primary); color: #fff; }
+  .reorder-btn:disabled { opacity: 0.35; pointer-events: none; }
+  
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s;
+  }
+  .modal-overlay.active { opacity: 1; visibility: visible; }
+  .modal {
+    background: var(--card);
+    width: 100%;
+    max-width: 480px;
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 32px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+  }
+  .modal-overlay.active .modal { transform: translateY(0); }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .modal-title { font-size: 20px; font-weight: 700; }
+  .close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  
+  .search-box { position: relative; margin-bottom: 12px; }
+  .search-box input { padding-left: 44px; }
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 18px;
+  }
+  
+  .filter-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filter-chips::-webkit-scrollbar { display: none; }
+  /* Sub-categories vertical */
+  #subfilter-chips {
+    flex-direction: column !important;
+    overflow-x: hidden !important;
+    overflow-y: visible;
+    gap: 6px;
+    padding-bottom: 12px;
+  }
+  #subfilter-chips .chip {
+    width: 100%;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    flex-shrink: 1;
+  }
+  .chip {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .chip.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+  .chip-remove {
+    background: none;
+    border: none;
+    color: var(--danger);
+    font-size: 16px;
+    padding: 0 4px;
+    margin-left: 8px;
+    cursor: pointer;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .chip.active .chip-remove { color: #fecaca; }
+  
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #1e293b;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    z-index: 200;
+    transition: transform 0.3s;
+    border: 1px solid #334155;
+    max-width: 90%;
+    text-align: center;
+  }
+  [data-theme="light"] .toast { background: #1e293b; color: white; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  
+  .strength-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .strength-fill { height: 100%; width: 0; transition: all 0.3s; }
+  
+  .fab {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    font-size: 28px;
+    box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+    cursor: pointer;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fab:active { transform: scale(0.92); }
+  
+  .menu-list { list-style: none; }
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: var(--bg);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+  }
+  .menu-item:active { opacity: 0.8; }
+  .menu-icon { font-size: 22px; width: 28px; text-align: center; }
+  
+  .hidden { display: none !important; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 16px; }
+  .flex-gap { display: flex; gap: 10px; }
+  .flex-gap > * { flex: 1; }
+  
+  .password-field { position: relative; }
+  .toggle-pass {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  .category-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: #1e3a5f;
+    color: #93c5fd;
+    margin-top: 6px;
+  }
+  [data-theme="light"] .category-badge {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+  
+  .attach-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+  .attach-thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: var(--border);
+  }
+  .attach-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: var(--border);
+    border-radius: 8px;
+  }
+  .attach-info { flex: 1; min-width: 0; }
+  .attach-name {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .attach-size { font-size: 11px; color: var(--text-muted); }
+  .attach-remove {
+    background: none;
+    border: none;
+    color: var(--danger);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  
+  .setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-weight: 500; }
+  .setting-desc { font-size: 12px; color: var(--text-muted); }
+  
+  .switch {
+    position: relative;
+    width: 48px;
+    height: 28px;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--border);
+    border-radius: 28px;
+    transition: 0.3s;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+  input:checked + .slider { background: var(--primary); }
+  input:checked + .slider:before { transform: translateX(20px); }
+  
+  .brand-footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 24px;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+  <!-- LOCK SCREEN -->
+  <div id="lock-screen">
+    <div class="lock-icon">🔒</div>
+    <div class="app-title">IMPORTANT DATA</div>
+    <div class="app-brand">AJEET PARMAR</div>
+    <div class="app-subtitle">Aapka personal data 100% safe</div>
+    
+    <div id="setup-form" class="hidden" style="width:100%;max-width:360px;">
+      <div class="form-group">
+        <label>Naya Master Password banaye</label>
+        <div class="password-field">
+          <input type="password" id="setup-password" placeholder="Kam se kam 8 characters" autocomplete="new-password">
+          <button class="toggle-pass" onclick="togglePassword('setup-password')">👁️</button>
+        </div>
+        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+      </div>
+      <div class="form-group">
+        <label>Password confirm karein</label>
+        <div class="password-field">
+          <input type="password" id="setup-confirm" placeholder="Password dobara likhein" autocomplete="new-password">
+          <button class="toggle-pass" onclick="togglePassword('setup-confirm')">👁️</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="setupMasterPassword()">Password Set Karein</button>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:16px;">
+        ⚠️ Password bhool gaye to data recover nahi ho sakta. Safely yaad rakhein.
+      </p>
+    </div>
+    
+    <div id="login-form" class="hidden" style="width:100%;max-width:360px;">
+      <div class="form-group">
+        <label>Master Password</label>
+        <div class="password-field">
+          <input type="password" id="login-password" placeholder="Master password daalein" autocomplete="current-password">
+          <button class="toggle-pass" onclick="togglePassword('login-password')">👁️</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="unlockVault()">Unlock</button>
+      <button class="btn btn-secondary mt-2" id="biometric-btn" onclick="tryBiometric()" style="display:none;">
+        👆 Fingerprint / Face Unlock
+      </button>
+      <p id="login-error" style="color:var(--danger);font-size:13px;margin-top:12px;" class="hidden"></p>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="main-app" class="hidden">
+    <div class="container">
+      <div class="header">
+        <div>
+          <h1>📋 IMPORTANT DATA</h1>
+          <div style="font-size:11px;color:var(--primary);font-weight:600;letter-spacing:0.5px;">AJEET PARMAR</div>
+        </div>
+      </div>
+      
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search entries..." oninput="renderEntries()">
+      </div>
+      
+      <div class="filter-chips" id="filter-chips">
+        <!-- filled by JS -->
+      </div>
+      <div class="filter-chips" id="subfilter-chips" style="display:none;margin-top:-4px;">
+        <!-- sub-category chips -->
+      </div>
+      
+      <div id="entries-list"></div>
+      
+      <div id="empty-state" class="empty-state hidden">
+        <div class="icon">📂</div>
+        <p>Koi entry nahi hai</p>
+        <p style="font-size:13px;margin-top:4px;">+ button se naya data add karein</p>
+      </div>
+      
+      <div class="brand-footer">IMPORTANT DATA • AJEET PARMAR</div>
+    </div>
+    
+    <button class="fab" onclick="openAddModal()">+</button>
+    
+    <!-- Bottom Tab Bar -->
+    <div class="bottom-nav">
+      <button class="bottom-nav-item active" id="nav-home" onclick="goHomeTab()">
+        <span class="nav-icon">🏠</span>
+        <span>Home</span>
+      </button>
+      <button class="bottom-nav-item" id="nav-theme" onclick="toggleTheme()">
+        <span class="nav-icon">🌓</span>
+        <span>Theme</span>
+      </button>
+      <button class="bottom-nav-item" id="nav-settings" onclick="openSettings()">
+        <span class="nav-icon">⚙️</span>
+        <span>Settings</span>
+      </button>
+      <button class="bottom-nav-item" id="nav-lock" onclick="lockVault()">
+        <span class="nav-icon">🔒</span>
+        <span>Lock</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT MODAL -->
+  <div class="modal-overlay" id="entry-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="entry-modal-title">Naya Entry</div>
+        <button class="close-btn" onclick="closeModal('entry-modal')">×</button>
+      </div>
+      <input type="hidden" id="edit-id">
+      <div class="form-group">
+        <label>Title / Website *</label>
+        <input type="text" id="entry-title" placeholder="e.g. Gmail, Bank, Instagram">
+      </div>
+      <!-- Normal login fields (optional) -->
+      <div id="fields-login">
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="opt-username" checked onchange="toggleOptionalField('username')" style="width:auto;accent-color:var(--primary);">
+            Username / Email add karna hai?
+          </label>
+          <div id="wrap-username">
+            <input type="text" id="entry-username" placeholder="username@email.com" style="margin-top:8px;">
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="opt-password" checked onchange="toggleOptionalField('password')" style="width:auto;accent-color:var(--primary);">
+            Password add karna hai?
+          </label>
+          <div id="wrap-password">
+            <div class="password-field" style="margin-top:8px;">
+              <input type="password" id="entry-password" placeholder="Password">
+              <button class="toggle-pass" onclick="togglePassword('entry-password')">👁️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Card fields — only for A&U Credit & Debit Card -->
+      <div id="fields-card" style="display:none;">
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="opt-card-number" checked onchange="toggleOptionalField('card-number')" style="width:auto;accent-color:var(--primary);">
+            Card Number add karna hai?
+          </label>
+          <div id="wrap-card-number">
+            <input type="text" id="entry-card-number" placeholder="XXXX XXXX XXXX XXXX" inputmode="numeric" style="margin-top:8px;">
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="opt-card-variant" checked onchange="toggleOptionalField('card-variant')" style="width:auto;accent-color:var(--primary);">
+            Variant add karna hai?
+          </label>
+          <div id="wrap-card-variant">
+            <select id="entry-card-variant" style="margin-top:8px;">
+              <option value="">Select</option>
+              <option value="RuPay">RuPay</option>
+              <option value="MasterCard">MasterCard</option>
+              <option value="Visa">Visa</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="opt-card-expiry" checked onchange="toggleOptionalField('card-expiry')" style="width:auto;accent-color:var(--primary);">
+            Expiry Date add karna hai?
+          </label>
+          <div id="wrap-card-expiry">
+            <input type="text" id="entry-card-expiry" placeholder="MM/YY" style="margin-top:8px;">
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="opt-card-cvv" checked onchange="toggleOptionalField('card-cvv')" style="width:auto;accent-color:var(--primary);">
+            CVV add karna hai?
+          </label>
+          <div id="wrap-card-cvv">
+            <div class="password-field" style="margin-top:8px;">
+              <input type="password" id="entry-card-cvv" placeholder="CVV" inputmode="numeric" maxlength="4">
+              <button class="toggle-pass" onclick="togglePassword('entry-card-cvv')">👁️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Category *</label>
+        <select id="entry-category" onchange="onCategoryChange()">
+          <!-- filled by JS -->
+        </select>
+      </div>
+      <div class="form-group" id="custom-category-group" class="hidden" style="display:none;">
+        <label>Custom Category Name</label>
+        <input type="text" id="entry-custom-category" placeholder="Apni category likhein">
+      </div>
+      <div class="form-group">
+        <label>Sub Category</label>
+        <select id="entry-subcategory" onchange="onSubCategoryChange()">
+          <!-- filled by JS -->
+        </select>
+      </div>
+      <div class="form-group" id="custom-subcategory-group" style="display:none;">
+        <label>Custom Sub Category Name</label>
+        <input type="text" id="entry-custom-subcategory" placeholder="Apni sub-category likhein">
+      </div>
+      
+      <!-- Custom fields — user can add any fields -->
+      <div class="form-group">
+        <label class="field-label-bold">Extra Fields (manual)</label>
+        <div id="saved-field-templates" style="margin-bottom:10px;"></div>
+        <div id="custom-fields-list"></div>
+        <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addCustomField()" style="width:100%;">+ Naya Field Add Karo</button>
+      </div>
+      
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" id="opt-notes" checked onchange="toggleOptionalField('notes')" style="width:auto;accent-color:var(--primary);">
+          Notes / Extra Info add karna hai?
+        </label>
+        <div id="wrap-notes">
+          <textarea id="entry-notes" placeholder="Koi bhi extra details..." style="margin-top:8px;"></textarea>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Attachments (Photo, PDF, Document etc.)</label>
+        <input type="file" id="entry-files" multiple accept="*/*" style="padding:10px;" onchange="handleFileSelect(event)">
+        <p style="font-size:11px;color:var(--text-muted);margin-top:6px;">Multiple files OK. Ek entry mein total max <strong>50 MB</strong>.</p>
+        <div id="attachments-preview" style="margin-top:10px;"></div>
+        <div id="attach-loading" class="hidden" style="font-size:12px;color:var(--primary);margin-top:6px;">File load ho rahi hai...</div>
+      </div>
+      
+      <div class="flex-gap mt-3">
+        <button class="btn btn-secondary" onclick="closeModal('entry-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEntry()">Save</button>
+      </div>
+      <button id="delete-entry-btn" class="btn btn-danger mt-3 hidden" onclick="deleteEntry()">Delete Entry</button>
+    </div>
+  </div>
+
+  <!-- VIEW ENTRY MODAL -->
+  <div class="modal-overlay" id="view-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="view-title">Entry</div>
+        <button class="close-btn" onclick="closeModal('view-modal')">×</button>
+      </div>
+      <div id="view-content"></div>
+      <div class="flex-gap mt-3">
+        <button class="btn btn-secondary" onclick="closeModal('view-modal')">Close</button>
+        <button class="btn btn-primary" onclick="editFromView()">Edit</button>
+      </div>
+      <button class="btn btn-secondary mt-2" style="width:100%;" onclick="shareEntry(currentViewId)">📧 Share / Email Entry</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Settings</div>
+        <button class="close-btn" onclick="closeModal('settings-modal')">×</button>
+      </div>
+      
+      <div style="margin-bottom:16px;">
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Dark / Light Theme</div>
+            <div class="setting-desc">Theme change karein</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="theme-switch" onchange="toggleThemeFromSwitch()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Auto-Lock Timer</div>
+            <div class="setting-desc">Inactive hone par auto lock</div>
+          </div>
+          <select id="autolock-select" onchange="setAutoLock()" style="width:auto;padding:8px 12px;font-size:13px;">
+            <option value="0">Never</option>
+            <option value="60">1 Minute</option>
+            <option value="300" selected>5 Minutes</option>
+            <option value="600">10 Minutes</option>
+            <option value="1800">30 Minutes</option>
+          </select>
+        </div>
+        
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Fingerprint / Face Unlock</div>
+            <div class="setting-desc" id="bio-status-text">Biometric enable karein</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="biometric-switch" onchange="toggleBiometricSetting()">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      
+      <ul class="menu-list">
+        <li class="menu-item" onclick="openChangePassword()">
+          <span class="menu-icon">🔑</span>
+          <div>
+            <div style="font-weight:600;">Change Master Password</div>
+            <div style="font-size:12px;color:var(--text-muted);">Purana password chahiye hoga</div>
+          </div>
+        </li>
+        <li class="menu-item" onclick="exportBackup()">
+          <span class="menu-icon">💾</span>
+          <div>
+            <div style="font-weight:600;">Backup Export (.vault)</div>
+            <div style="font-size:12px;color:var(--text-muted);">Encrypted file download</div>
+          </div>
+        </li>
+        <li class="menu-item" onclick="document.getElementById('import-file').click()">
+          <span class="menu-icon">📥</span>
+          <div>
+            <div style="font-weight:600;">Restore Backup</div>
+            <div style="font-size:12px;color:var(--text-muted);">Encrypted backup se restore</div>
+          </div>
+        </li>
+        <li class="menu-item" onclick="openPdfExportPicker()">
+          <span class="menu-icon">📄</span>
+          <div>
+            <div style="font-weight:600;">Export to PDF</div>
+            <div style="font-size:12px;color:var(--text-muted);">Category / entry choose karke PDF</div>
+          </div>
+        </li>
+        <li class="menu-item" onclick="openManageCategories()">
+          <span class="menu-icon">📁</span>
+          <div>
+            <div style="font-weight:600;">Manage Categories</div>
+            <div style="font-size:12px;color:var(--text-muted);">Category / Sub-category remove</div>
+          </div>
+        </li>
+        <li class="menu-item" onclick="openManageSavedFields()">
+          <span class="menu-icon">🏷️</span>
+          <div>
+            <div style="font-weight:600;">Manage Saved Fields</div>
+            <div style="font-size:12px;color:var(--text-muted);">Extra fields list se remove (A–Z)</div>
+          </div>
+        </li>
+悪人
+        <li class="menu-item" onclick="confirmClearAll()">
+          <span class="menu-icon">🗑️</span>
+          <div>
+            <div style="font-weight:600;color:var(--danger);">Clear All Data</div>
+            <div style="font-size:12px;color:var(--text-muted);">Sab kuch permanently delete</div>
+          </div>
+        </li>
+      </ul>
+      
+      <input type="file" id="import-file" accept=".vault,.json" class="hidden" onchange="importBackup(event)">
+      
+      <p class="brand-footer" style="margin-top:20px;">
+        Secure Vault v1.2<br>
+        <button type="button" id="pwa-install-btn" class="btn btn-primary mt-2" style="display:none;" onclick="triggerPwaInstall()">📲 Install App</button>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">GitHub Pages (HTTPS) pe open karke Install app option aayega. Local file pe nahi aata.</p>
+        Designed & Secured by <strong>AJEET PARMAR</strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- MANAGE CATEGORIES MODAL -->
+  <div class="modal-overlay" id="manage-cat-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Manage Categories</div>
+        <button class="close-btn" onclick="closeModal('manage-cat-modal')">×</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Category / Sub-category hatao. Entries delete nahi hongi.</p>
+      <div id="manage-cat-list"></div>
+      <button class="btn btn-secondary mt-2" onclick="closeModal('manage-cat-modal')">Close</button>
+    </div>
+  </div>
+
+  <!-- MANAGE SAVED FIELDS MODAL -->
+  <div class="modal-overlay" id="manage-fields-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Manage Saved Fields</div>
+        <button class="close-btn" onclick="closeModal('manage-fields-modal')">×</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Saved list se field hatao (A–Z). Purani entries safe rehti hain.</p>
+      <input type="text" id="cf-search-del" placeholder="🔍 Search field..." style="margin-bottom:8px;" autocomplete="off">
+      <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:12px;">
+        <select id="cf-template-delete" style="flex:1;"></select>
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeCustomFieldFromDropdown()" style="white-space:nowrap;">Remove</button>
+      </div>
+      <button class="btn btn-secondary mt-2" onclick="closeModal('manage-fields-modal')">Close</button>
+    </div>
+  </div>
+
+  <!-- PDF EXPORT PICKER -->
+  <div class="modal-overlay" id="pdf-pick-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">PDF Export — Select</div>
+        <button class="close-btn" onclick="closeModal('pdf-pick-modal')">×</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Sirf selected category / sub / entries PDF mein jayengi.</p>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="pdfPickSelectAll(true)">Select All</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="pdfPickSelectAll(false)">Deselect All</button>
+      </div>
+      <div id="pdf-pick-list" style="max-height:50vh;overflow-y:auto;"></div>
+      <button class="btn btn-primary mt-3" onclick="startSelectedPdfExport()">PDF Banao</button>
+      <button class="btn btn-secondary mt-2" onclick="closeModal('pdf-pick-modal')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD MODAL -->
+  <div class="modal-overlay" id="change-pass-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Change Master Password</div>
+        <button class="close-btn" onclick="closeModal('change-pass-modal')">×</button>
+      </div>
+      <div class="form-group">
+        <label>Current (Purana) Password *</label>
+        <div class="password-field">
+          <input type="password" id="old-password" placeholder="Purana password">
+          <button class="toggle-pass" onclick="togglePassword('old-password')">👁️</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Naya Password *</label>
+        <div class="password-field">
+          <input type="password" id="new-password" placeholder="Naya password (min 8 chars)">
+          <button class="toggle-pass" onclick="togglePassword('new-password')">👁️</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Naya Password Confirm *</label>
+        <div class="password-field">
+          <input type="password" id="new-password-confirm" placeholder="Naya password dobara">
+          <button class="toggle-pass" onclick="togglePassword('new-password-confirm')">👁️</button>
+        </div>
+      </div>
+      <button class="btn btn-primary mt-2" onclick="changeMasterPassword()">Password Change Karein</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+// ==================== CRYPTO & STORAGE ====================
+const DB_NAME = 'SecureVaultDB';
+const STORE_NAME = 'vault';
+const SALT_KEY = 'vault_salt';
+const VERIFIER_KEY = 'vault_verifier';
+const SETTINGS_KEY = 'vault_settings';
+
+let masterKey = null;
+let entries = [];
+let currentViewId = null;
+let currentFilter = 'All';
+let autoLockSeconds = 300;
+let autoLockTimer = null;
+let lastActivity = Date.now();
+let pendingAttachments = []; // temporary attachments while adding/editing entry
+let currentSubFilter = null;
+let customCategories = {}; // { "MyCat": ["Sub1", "Sub2"], ... }
+let hiddenSubs = {}; // { "Bank": ["Retirement"], ... } — removed default/custom subs
+let hiddenCats = []; // custom main categories user removed (defaults can't fully remove)
+
+// Default category → sub-category tree
+const DEFAULT_CATEGORY_TREE = {
+  'Bank': [
+    'Accounts',
+    'Cards/Loans',
+    'Digital Banking',
+    'Investments/Mutual Funds',
+    'Credit/Reports',
+    'Retirement'
+  ],
+  'Login': [
+    'Crypto Wallets',
+    'Crypto Exchanges',
+    'Email IDs',
+    'Social Media',
+    'Shopping/Travel',
+    'Devices'
+  ],
+  'Personal': [
+    'ID Documents',
+    'Photos',
+    'Health',
+    'Government/Registration',
+    'Trading/Finance Docs',
+    'Contacts',
+    'Security Keys',
+    'Important PDFs',
+    'Baby/Maher Records',
+    'Misc Personal'
+  ],
+  'Other': []
+};
+
+function getCategoryTree() {
+  const tree = {};
+  Object.keys(DEFAULT_CATEGORY_TREE).forEach(k => {
+    if (hiddenCats.includes(k) && !DEFAULT_CATEGORY_TREE[k]) return;
+    tree[k] = DEFAULT_CATEGORY_TREE[k].slice();
+  });
+  Object.keys(customCategories || {}).forEach(k => {
+    if (hiddenCats.includes(k)) return;
+    if (!tree[k]) tree[k] = [];
+    const subs = customCategories[k] || [];
+    subs.forEach(s => {
+      if (s && !tree[k].includes(s)) tree[k].push(s);
+    });
+  });
+  // Apply hidden sub-categories
+  Object.keys(tree).forEach(k => {
+    const hide = hiddenSubs[k] || [];
+    if (hide.length) tree[k] = tree[k].filter(s => !hide.includes(s));
+  });
+  return tree;
+}
+
+function isCustomSub(cat, sub) {
+  const defaults = DEFAULT_CATEGORY_TREE[cat] || [];
+  if (defaults.includes(sub)) return false;
+  return true;
+}
+
+function isCustomCat(cat) {
+  return !DEFAULT_CATEGORY_TREE.hasOwnProperty(cat);
+}
+
+function entryMatchesQuery(e, query) {
+  if (!query) return true;
+  const q = query.toLowerCase();
+  const parts = [
+    e.title, e.username, e.password, e.notes, e.category, e.subcategory,
+    e.cardNumber, e.cardVariant, e.cardExpiry, e.cardCvv
+  ];
+  if (e.customFields && e.customFields.length) {
+    e.customFields.forEach(cf => {
+      if (cf) { parts.push(cf.label); parts.push(cf.value); }
+    });
+  }
+  if (e.attachments && e.attachments.length) {
+    e.attachments.forEach(a => { if (a && a.name) parts.push(a.name); });
+  }
+  return parts.some(p => p && String(p).toLowerCase().includes(q));
+}
+
+function buildFilterChips() {
+  const tree = getCategoryTree();
+  const main = document.getElementById('filter-chips');
+  if (!main) return;
+  const total = entries.length;
+  const cats = ['All', ...Object.keys(tree)];
+  main.innerHTML = cats.map(c => {
+    if (c === 'All') {
+      return `<div class="chip ${currentFilter === c ? 'active' : ''}" data-filter-cat="All">All (${total})</div>`;
+    }
+    const n = entries.filter(e => (e.category || 'Other') === c).length;
+    return `<div class="chip ${currentFilter === c ? 'active' : ''}" data-filter-cat="${escapeHtml(c)}">${escapeHtml(c)}${n ? ' (' + n + ')' : ''}</div>`;
+  }).join('');
+  main.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => setFilter(chip.getAttribute('data-filter-cat')));
+  });
+  buildSubFilterChips();
+}
+
+function buildSubFilterChips() {
+  // Sub-categories now render inside entries list (accordion) — hide old chip strip
+  const subEl = document.getElementById('subfilter-chips');
+  if (subEl) {
+    subEl.style.display = 'none';
+    subEl.innerHTML = '';
+  }
+}
+
+async function removeSubCategory(cat, sub) {
+  if (!cat || !sub || sub === 'All') return;
+  if (!confirm(`Sub-category hataein?\n\n"${cat} › ${sub}"\n\nEntries delete nahi hongi — sirf list se hat jayegi.`)) return;
+  
+  if (!hiddenSubs[cat]) hiddenSubs[cat] = [];
+  if (!hiddenSubs[cat].includes(sub)) hiddenSubs[cat].push(sub);
+  
+  if (customCategories[cat]) {
+    customCategories[cat] = customCategories[cat].filter(s => s !== sub);
+  }
+  
+  if (currentSubFilter === sub) currentSubFilter = null;
+  await saveCustomCategories();
+  buildFilterChips();
+  renderEntries();
+  openManageCategories(); // refresh list if open
+  showToast('Sub-category hata di: ' + sub);
+}
+
+async function removeCategory(cat) {
+  if (!cat || cat === 'All') return;
+  if (!isCustomCat(cat)) {
+    showToast('Default category (Bank/Login/Personal/Other) fully remove nahi hoti. Sub-categories Manage se hatao.');
+    return;
+  }
+  if (!confirm(`Category hataein?\n\n"${cat}"\n\nEntries delete nahi hongi.`)) return;
+  if (!hiddenCats.includes(cat)) hiddenCats.push(cat);
+  delete customCategories[cat];
+  if (currentFilter === cat) {
+    currentFilter = 'All';
+    currentSubFilter = null;
+  }
+  await saveCustomCategories();
+  buildFilterChips();
+  renderEntries();
+  openManageCategories();
+  showToast('Category hata di: ' + cat);
+}
+
+function openManageCategories() {
+  const box = document.getElementById('manage-cat-list');
+  if (!box) return;
+  const tree = getCategoryTree();
+  let html = '';
+  Object.keys(tree).forEach(cat => {
+    const isCustom = isCustomCat(cat);
+    html += `<div style="margin-bottom:14px;padding:12px;background:var(--bg);border-radius:12px;border:1px solid var(--border);">`;
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">`;
+    html += `<strong>${escapeHtml(cat)}</strong>`;
+    html += `<div style="display:flex;gap:6px;">`;
+    if (isCustom) {
+      html += `<button type="button" class="btn btn-secondary btn-sm" data-edit-cat="${escapeHtml(cat)}">Edit</button>`;
+      html += `<button type="button" class="btn btn-danger btn-sm" data-del-cat="${escapeHtml(cat)}">Remove</button>`;
+    } else {
+      html += `<span style="font-size:11px;color:var(--text-muted);">Default</span>`;
+    }
+    html += `</div></div>`;
+    const subs = tree[cat] || [];
+    if (!subs.length) {
+      html += `<div style="font-size:12px;color:var(--text-muted);">No sub-categories</div>`;
+    } else {
+      subs.forEach(sub => {
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);flex-wrap:wrap;">`;
+        html += `<span style="font-size:14px;">${escapeHtml(sub)}</span>`;
+        html += `<div style="display:flex;gap:6px;">`;
+        html += `<button type="button" class="btn btn-secondary btn-sm" data-edit-sub-cat="${escapeHtml(cat)}" data-edit-sub="${escapeHtml(sub)}">Edit</button>`;
+        html += `<button type="button" class="btn btn-secondary btn-sm" data-del-sub-cat="${escapeHtml(cat)}" data-del-sub="${escapeHtml(sub)}">Remove</button>`;
+        html += `</div></div>`;
+      });
+    }
+    html += `</div>`;
+  });
+  if (!Object.keys(tree).length) {
+    html = '<p style="color:var(--text-muted);">Koi category nahi</p>';
+  }
+  box.innerHTML = html;
+  
+  box.querySelectorAll('[data-edit-cat]').forEach(btn => {
+    btn.addEventListener('click', () => renameCategory(btn.getAttribute('data-edit-cat')));
+  });
+  box.querySelectorAll('[data-del-cat]').forEach(btn => {
+    btn.addEventListener('click', () => removeCategory(btn.getAttribute('data-del-cat')));
+  });
+  box.querySelectorAll('[data-edit-sub]').forEach(btn => {
+    btn.addEventListener('click', () => renameSubCategory(
+      btn.getAttribute('data-edit-sub-cat'),
+      btn.getAttribute('data-edit-sub')
+    ));
+  });
+  box.querySelectorAll('[data-del-sub]').forEach(btn => {
+    btn.addEventListener('click', () => removeSubCategory(
+      btn.getAttribute('data-del-sub-cat'),
+      btn.getAttribute('data-del-sub')
+    ));
+  });
+  
+  openModal('manage-cat-modal');
+}
+
+async function renameCategory(oldName) {
+  if (!oldName || !isCustomCat(oldName)) {
+    showToast('Default category rename nahi hoti');
+    return;
+  }
+  const newName = (prompt('Naya category name:', oldName) || '').trim();
+  if (!newName || newName === oldName) return;
+  if (DEFAULT_CATEGORY_TREE[newName] || customCategories[newName]) {
+    showToast('Ye naam pehle se hai');
+    return;
+  }
+  customCategories[newName] = customCategories[oldName] || [];
+  delete customCategories[oldName];
+  if (hiddenSubs[oldName]) {
+    hiddenSubs[newName] = hiddenSubs[oldName];
+    delete hiddenSubs[oldName];
+  }
+  entries.forEach(e => {
+    if (e.category === oldName) e.category = newName;
+  });
+  if (currentFilter === oldName) currentFilter = newName;
+  await persistEntries();
+  await saveCustomCategories();
+  buildFilterChips();
+  renderEntries();
+  openManageCategories();
+  showToast('Category rename: ' + newName);
+}
+
+async function renameSubCategory(cat, oldSub) {
+  if (!cat || !oldSub) return;
+  const newSub = (prompt('Naya sub-category name:', oldSub) || '').trim();
+  if (!newSub || newSub === oldSub) return;
+  
+  // Update tree storage
+  const defaults = DEFAULT_CATEGORY_TREE[cat] || [];
+  if (defaults.includes(oldSub)) {
+    // Hide old default name, add custom new name
+    if (!hiddenSubs[cat]) hiddenSubs[cat] = [];
+    if (!hiddenSubs[cat].includes(oldSub)) hiddenSubs[cat].push(oldSub);
+    if (!customCategories[cat]) customCategories[cat] = [];
+    if (!customCategories[cat].includes(newSub)) customCategories[cat].push(newSub);
+  } else {
+    if (!customCategories[cat]) customCategories[cat] = [];
+    customCategories[cat] = customCategories[cat].map(s => s === oldSub ? newSub : s);
+    if (!customCategories[cat].includes(newSub)) customCategories[cat].push(newSub);
+  }
+  
+  entries.forEach(e => {
+    if (e.category === cat && matchSub(e.subcategory, oldSub)) {
+      e.subcategory = newSub;
+    }
+  });
+  if (currentSubFilter === oldSub) currentSubFilter = newSub;
+  await persistEntries();
+  await saveCustomCategories();
+  buildFilterChips();
+  renderEntries();
+  openManageCategories();
+  showToast('Sub-category rename: ' + newSub);
+}
+
+function fillCategorySelect(selectedCat, selectedSub) {
+  const tree = getCategoryTree();
+  const catSel = document.getElementById('entry-category');
+  const subSel = document.getElementById('entry-subcategory');
+  if (!catSel || !subSel) return;
+  
+  const cats = Object.keys(tree);
+  catSel.innerHTML = cats.map(c =>
+    `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`
+  ).join('') + `<option value="__custom__">+ Custom Category</option>`;
+  
+  if (selectedCat && (tree[selectedCat] || selectedCat === '__custom__')) {
+    catSel.value = tree[selectedCat] ? selectedCat : '__custom__';
+  } else if (selectedCat && !tree[selectedCat]) {
+    // unknown custom main category
+    catSel.innerHTML += `<option value="${escapeHtml(selectedCat)}">${escapeHtml(selectedCat)}</option>`;
+    catSel.value = selectedCat;
+  } else {
+    catSel.value = cats[0] || 'Bank';
+  }
+  
+  onCategoryChange(selectedSub);
+  
+  if (selectedCat && !tree[selectedCat] && selectedCat !== '__custom__') {
+    document.getElementById('custom-category-group').style.display = 'block';
+    document.getElementById('entry-custom-category').value = selectedCat;
+  }
+}
+
+function onCategoryChange(preserveSub) {
+  const catSel = document.getElementById('entry-category');
+  const subSel = document.getElementById('entry-subcategory');
+  const customCatGroup = document.getElementById('custom-category-group');
+  const customSubGroup = document.getElementById('custom-subcategory-group');
+  if (!catSel || !subSel) return;
+  
+  const cat = catSel.value;
+  if (cat === '__custom__') {
+    customCatGroup.style.display = 'block';
+    subSel.innerHTML = `<option value="__custom__">+ Custom Sub Category</option><option value="">(None)</option>`;
+    customSubGroup.style.display = 'block';
+    return;
+  }
+  customCatGroup.style.display = 'none';
+  
+  const tree = getCategoryTree();
+  const subs = tree[cat] || [];
+  subSel.innerHTML =
+    `<option value="">(None)</option>` +
+    subs.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('') +
+    `<option value="__custom__">+ Custom Sub Category</option>`;
+  
+  if (preserveSub) {
+    const exists = [...subSel.options].some(o => o.value === preserveSub);
+    if (exists) subSel.value = preserveSub;
+    else if (preserveSub) {
+      subSel.innerHTML = `<option value="${escapeHtml(preserveSub)}">${escapeHtml(preserveSub)}</option>` + subSel.innerHTML;
+      subSel.value = preserveSub;
+    }
+  }
+  onSubCategoryChange();
+}
+
+function onSubCategoryChange() {
+  const subSel = document.getElementById('entry-subcategory');
+  const customSubGroup = document.getElementById('custom-subcategory-group');
+  if (!subSel || !customSubGroup) return;
+  customSubGroup.style.display = subSel.value === '__custom__' ? 'block' : 'none';
+  updateEntryFormMode();
+}
+
+function isCardSubCategory(cat, sub) {
+  // Only this sub-category gets card form
+  const s = (sub || '').trim().toLowerCase();
+  const c = (cat || '').trim().toLowerCase();
+  if (!s) return false;
+  // Match "A&U Credit & Debit Card" and close variants
+  if (s.includes('a&u') && (s.includes('credit') || s.includes('debit') || s.includes('card'))) return true;
+  if (s === 'a&u credit & debit card') return true;
+  return false;
+}
+
+function updateEntryFormMode() {
+  let cat = document.getElementById('entry-category')?.value || '';
+  let sub = document.getElementById('entry-subcategory')?.value || '';
+  if (cat === '__custom__') cat = (document.getElementById('entry-custom-category')?.value || '').trim();
+  if (sub === '__custom__') sub = (document.getElementById('entry-custom-subcategory')?.value || '').trim();
+  
+  const cardMode = isCardSubCategory(cat, sub);
+  const loginEl = document.getElementById('fields-login');
+  const cardEl = document.getElementById('fields-card');
+  if (loginEl) loginEl.style.display = cardMode ? 'none' : 'block';
+  if (cardEl) cardEl.style.display = cardMode ? 'block' : 'none';
+  
+  const titleInput = document.getElementById('entry-title');
+  if (titleInput) {
+    titleInput.placeholder = cardMode ? 'e.g. HDFC Card, SBI Debit' : 'e.g. Gmail, Bank, Instagram';
+  }
+  if (!cardMode) {
+    toggleOptionalField('username');
+    toggleOptionalField('password');
+  } else {
+    toggleOptionalField('card-number');
+    toggleOptionalField('card-variant');
+    toggleOptionalField('card-expiry');
+    toggleOptionalField('card-cvv');
+  }
+  toggleOptionalField('notes');
+}
+
+function toggleOptionalField(which) {
+  const map = {
+    'username': { opt: 'opt-username', wrap: 'wrap-username', input: 'entry-username' },
+    'password': { opt: 'opt-password', wrap: 'wrap-password', input: 'entry-password' },
+    'card-number': { opt: 'opt-card-number', wrap: 'wrap-card-number', input: 'entry-card-number' },
+    'card-variant': { opt: 'opt-card-variant', wrap: 'wrap-card-variant', input: 'entry-card-variant' },
+    'card-expiry': { opt: 'opt-card-expiry', wrap: 'wrap-card-expiry', input: 'entry-card-expiry' },
+    'card-cvv': { opt: 'opt-card-cvv', wrap: 'wrap-card-cvv', input: 'entry-card-cvv' },
+    'notes': { opt: 'opt-notes', wrap: 'wrap-notes', input: 'entry-notes' }
+  };
+  const m = map[which];
+  if (!m) return;
+  const on = document.getElementById(m.opt)?.checked;
+  const wrap = document.getElementById(m.wrap);
+  if (wrap) wrap.style.display = on ? 'block' : 'none';
+  if (!on) {
+    const inp = document.getElementById(m.input);
+    if (inp) inp.value = '';
+  }
+}
+
+// pendingCustomFields: [{ id, label, value, enabled }]
+let pendingCustomFields = [];
+// savedFieldTemplates: ["PIN", "IFSC", ...] — persist so user doesn't recreate every time
+let savedFieldTemplates = [];
+// Multi-select order for Add (1,2,3... as user taps)
+let multiFieldSelectOrder = [];
+
+function addCustomField(prefill) {
+  let label = prefill?.label;
+  if (!label) {
+    label = (prompt('Field ka naam likhein (e.g. PIN, Account No, IFSC, Mobile No):') || '').trim();
+  }
+  if (!label) return;
+  // Same field multiple times allowed (e.g. Mobile No x2)
+  pendingCustomFields.push({
+    id: prefill?.id || crypto.randomUUID(),
+    label: label,
+    value: prefill?.value || '',
+    enabled: prefill?.enabled !== false
+  });
+  rememberFieldTemplate(label);
+  renderCustomFieldsEditor();
+}
+
+function fillFieldSelect(selectId, list, includeNew) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  const prev = sel.value;
+  let html = `<option value="">— Field choose karo —</option>`;
+  list.forEach(t => {
+    html += `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`;
+  });
+  if (includeNew) {
+    html += `<option value="__new__">+ Naya field naam likho...</option>`;
+  }
+  sel.innerHTML = html;
+  if (prev && [...sel.options].some(o => o.value === prev)) {
+    sel.value = prev;
+  }
+}
+
+function renderMultiFieldList(list) {
+  const box = document.getElementById('cf-multi-list');
+  if (!box) return;
+  if (!list.length) {
+    box.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--text-muted);">Koi field nahi</div>';
+    return;
+  }
+  box.innerHTML = list.map(t => {
+    // Count how many times selected (allow multi of same)
+    const indices = [];
+    multiFieldSelectOrder.forEach((x, i) => { if (x === t) indices.push(i + 1); });
+    const selected = indices.length > 0;
+    const numHtml = selected
+      ? indices.map(n => `<span class="cf-multi-num">${n}</span>`).join('')
+      : `<span class="cf-multi-num empty">0</span>`;
+    return `<div class="cf-multi-item ${selected ? 'selected' : ''}" data-label="${escapeHtml(t)}">
+      <div style="display:flex;gap:4px;flex-shrink:0;">${numHtml}</div>
+      <span style="flex:1;">${escapeHtml(t)}</span>
+    </div>`;
+  }).join('');
+  
+  box.querySelectorAll('.cf-multi-item').forEach(row => {
+    row.addEventListener('click', () => {
+      const label = row.getAttribute('data-label');
+      // Each tap adds another instance at next number (order by selection)
+      multiFieldSelectOrder.push(label);
+      // Re-render current filtered list
+      const searchAdd = document.getElementById('cf-search-add');
+      const q = (searchAdd?.value || '').trim().toLowerCase();
+      const sorted = savedFieldTemplates.slice().sort((a, b) =>
+        a.localeCompare(b, undefined, { sensitivity: 'base' })
+      );
+      const filtered = q ? sorted.filter(t => t.toLowerCase().includes(q)) : sorted;
+      renderMultiFieldList(filtered);
+    });
+  });
+}
+
+function clearMultiFieldSelect() {
+  multiFieldSelectOrder = [];
+  const searchAdd = document.getElementById('cf-search-add');
+  const q = (searchAdd?.value || '').trim().toLowerCase();
+  const sorted = savedFieldTemplates.slice().sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: 'base' })
+  );
+  const filtered = q ? sorted.filter(t => t.toLowerCase().includes(q)) : sorted;
+  renderMultiFieldList(filtered);
+}
+
+function addSelectedMultiFields() {
+  if (!multiFieldSelectOrder.length) {
+    showToast('Pehle fields select karo (order mein touch)');
+    return;
+  }
+  multiFieldSelectOrder.forEach(label => {
+    pendingCustomFields.push({
+      id: crypto.randomUUID(),
+      label,
+      value: '',
+      enabled: true
+    });
+    rememberFieldTemplate(label);
+  });
+  multiFieldSelectOrder = [];
+  renderCustomFieldsEditor();
+  showToast('Fields add ho gaye');
+}
+
+function rememberFieldTemplate(label) {
+  if (!label) return;
+  const exists = savedFieldTemplates.some(t => t.toLowerCase() === label.toLowerCase());
+  if (!exists) {
+    savedFieldTemplates.push(label);
+    saveFieldTemplates();
+  }
+}
+
+async function saveFieldTemplates() {
+  try {
+    const s = (await idbGet(SETTINGS_KEY)) || {};
+    s.savedFieldTemplates = savedFieldTemplates;
+    await idbSet(SETTINGS_KEY, s);
+  } catch (e) {}
+  try {
+    localStorage.setItem('vault_field_templates', JSON.stringify(savedFieldTemplates));
+  } catch (e) {}
+}
+
+function removeFieldTemplate(label) {
+  savedFieldTemplates = savedFieldTemplates.filter(t => t !== label);
+  saveFieldTemplates();
+  renderCustomFieldsEditor();
+  showToast('Saved field hata diya');
+}
+
+function removeCustomFieldFromDropdown() {
+  const sel = document.getElementById('cf-template-delete');
+  if (!sel) return;
+  const val = sel.value;
+  if (!val) {
+    showToast('Pehle list se field choose karo');
+    return;
+  }
+  if (!confirm('Saved list se hataein?\n\n"' + val + '"\n\nPurani entries safe rehti hain.')) return;
+  removeFieldTemplate(val);
+  // Refresh settings manage list if open
+  if (document.getElementById('manage-fields-modal')?.classList.contains('active')) {
+    openManageSavedFields();
+  }
+}
+
+function removeCustomField(id) {
+  pendingCustomFields = pendingCustomFields.filter(f => f.id !== id);
+  renderCustomFieldsEditor();
+}
+
+function editCustomFieldLabel(id) {
+  const f = pendingCustomFields.find(x => x.id === id);
+  if (!f) return;
+  const old = f.label;
+  const n = (prompt('Naya field naam:', f.label) || '').trim();
+  if (!n) return;
+  f.label = n;
+  rememberFieldTemplate(n);
+  saveFieldTemplates();
+  renderCustomFieldsEditor();
+}
+
+function renderCustomFieldsEditor() {
+  const box = document.getElementById('custom-fields-list');
+  const tpl = document.getElementById('saved-field-templates');
+  
+  if (tpl) {
+    // Always A–Z sorted
+    const sorted = savedFieldTemplates.slice().sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: 'base' })
+    );
+    
+    tpl.innerHTML = `
+      <div style="font-size:12px;font-weight:700;margin-bottom:6px;">Saved fields — Add (A–Z, multi-select)</div>
+      <input type="text" id="cf-search-add" placeholder="🔍 Search field..." style="margin-bottom:8px;" autocomplete="off">
+      <div id="cf-multi-list" class="cf-multi-list"></div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <button type="button" class="btn btn-primary btn-sm" onclick="addSelectedMultiFields()" style="flex:1;">Add Selected</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="clearMultiFieldSelect()">Clear</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="addCustomField()">+ Naya naam</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:6px;">Fields pe order mein touch (1,2,3…) → Add Selected. Field remove: Settings → Manage Saved Fields.</p>
+    `;
+    
+    renderMultiFieldList(sorted);
+    
+    const searchAdd = document.getElementById('cf-search-add');
+    if (searchAdd) {
+      searchAdd.addEventListener('input', () => {
+        const q = searchAdd.value.trim().toLowerCase();
+        const filtered = sorted.filter(t => t.toLowerCase().includes(q));
+        renderMultiFieldList(filtered);
+      });
+    }
+  }
+  
+  if (!box) return;
+  if (!pendingCustomFields.length) {
+    box.innerHTML = '<p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Abhi form pe koi extra field nahi. Upar dropdown se choose karke Add karo.</p>';
+    return;
+  }
+  
+  // Count duplicates for display: Mobile No, Mobile No (2)
+  const labelCount = {};
+  box.innerHTML = pendingCustomFields.map((f, idx) => {
+    labelCount[f.label] = (labelCount[f.label] || 0) + 1;
+    const n = labelCount[f.label];
+    const sameTotal = pendingCustomFields.filter(x => x.label === f.label).length;
+    const displayLabel = sameTotal > 1 ? `${f.label} (${n})` : f.label;
+    return `
+    <div style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--bg);">
+      <label class="field-label-bold" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:8px;">
+        <input type="checkbox" ${f.enabled ? 'checked' : ''} onchange="pendingCustomFields[${idx}].enabled=this.checked;document.getElementById('cf-wrap-${f.id}').style.display=this.checked?'block':'none'; if(!this.checked){const i=document.getElementById('cf-val-${f.id}');if(i)i.value='';pendingCustomFields[${idx}].value='';}" style="width:auto;accent-color:var(--primary);">
+        <span style="flex:1;font-weight:700;">${escapeHtml(displayLabel)}</span>
+      </label>
+      <div id="cf-wrap-${f.id}" style="display:${f.enabled ? 'block' : 'none'};">
+        <input type="text" id="cf-val-${f.id}" value="${escapeHtml(f.value)}" placeholder="${escapeHtml(f.label)}" oninput="pendingCustomFields[${idx}].value=this.value" style="margin-bottom:8px;">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="editCustomFieldLabel('${f.id}')">Edit naam</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeCustomField('${f.id}')">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function collectCustomFieldsForSave() {
+  const list = pendingCustomFields
+    .filter(f => f.enabled && f.label)
+    .map(f => ({
+      id: f.id,
+      label: f.label,
+      value: (document.getElementById('cf-val-' + f.id)?.value ?? f.value ?? '').trim()
+    }));
+  list.forEach(f => rememberFieldTemplate(f.label));
+  return list;
+}
+
+function viewFieldRow(label, value, hideIfEmpty) {
+  if (hideIfEmpty && (value === undefined || value === null || String(value).trim() === '')) return '';
+  const v = String(value ?? '');
+  const safe = escapeHtml(v);
+  // copyText needs escaped for template in onclick - use data attribute approach via encodeURIComponent
+  const copyVal = encodeURIComponent(v);
+  return `
+    <div class="form-group">
+      <label>${escapeHtml(label)}</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" value="${safe}" readonly style="flex:1;">
+        <button class="btn btn-secondary btn-sm" onclick="copyText(decodeURIComponent('${copyVal}'))">Copy</button>
+      </div>
+    </div>`;
+}
+
+function viewSecretRow(label, value, inputId) {
+  if (value === undefined || value === null || String(value).length === 0) return '';
+  const v = String(value);
+  const safe = escapeHtml(v);
+  const copyVal = encodeURIComponent(v);
+  return `
+    <div class="form-group">
+      <label>${escapeHtml(label)}</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="password-field" style="flex:1;">
+          <input type="password" id="${inputId}" value="${safe}" readonly>
+          <button class="toggle-pass" onclick="togglePassword('${inputId}')">👁️</button>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="copyText(decodeURIComponent('${copyVal}'))">Copy</button>
+      </div>
+    </div>`;
+}
+
+function resolveCategoryFields() {
+  let category = document.getElementById('entry-category').value;
+  let subcategory = document.getElementById('entry-subcategory').value;
+  
+  if (category === '__custom__') {
+    category = (document.getElementById('entry-custom-category').value || '').trim() || 'Other';
+  }
+  if (subcategory === '__custom__') {
+    subcategory = (document.getElementById('entry-custom-subcategory').value || '').trim();
+  }
+  if (subcategory === '') subcategory = '';
+  
+  // Persist custom names into customCategories for future dropdowns
+  if (category && !DEFAULT_CATEGORY_TREE[category]) {
+    if (!customCategories[category]) customCategories[category] = [];
+  }
+  if (category && subcategory) {
+    if (!customCategories[category]) customCategories[category] = [];
+    if (!customCategories[category].includes(subcategory) &&
+        !(DEFAULT_CATEGORY_TREE[category] || []).includes(subcategory)) {
+      customCategories[category].push(subcategory);
+    }
+  }
+  saveCustomCategories();
+  return { category, subcategory };
+}
+
+async function saveCustomCategories() {
+  try {
+    const s = (await idbGet(SETTINGS_KEY)) || {};
+    s.customCategories = customCategories;
+    s.hiddenSubs = hiddenSubs;
+    s.hiddenCats = hiddenCats;
+    await idbSet(SETTINGS_KEY, s);
+  } catch (e) {}
+}
+
+async function loadCustomCategories() {
+  try {
+    const s = await idbGet(SETTINGS_KEY);
+    if (s && s.customCategories) customCategories = s.customCategories;
+    if (s && s.hiddenSubs) hiddenSubs = s.hiddenSubs;
+    if (s && s.hiddenCats) hiddenCats = s.hiddenCats;
+  } catch (e) {}
+}
+
+// --- Utility ---
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function togglePassword(id) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+let modalStack = []; // for Android back button
+
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('active');
+  modalStack = modalStack.filter(m => m !== id);
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+  if (!modalStack.includes(id)) {
+    modalStack.push(id);
+    try {
+      history.pushState({ modal: id }, '');
+    } catch (e) {}
+  }
+  resetAutoLock();
+}
+
+function historyBackSafe() {
+  // pop our modal state without exiting if possible
+  if (modalStack.length) {
+    const top = modalStack[modalStack.length - 1];
+    closeModal(top);
+  }
+}
+
+function getAnyOpenModal() {
+  const ids = ['view-modal','entry-modal','settings-modal','change-pass-modal','manage-cat-modal','pdf-pick-modal','manage-fields-modal'];
+  return ids.find(id => document.getElementById(id)?.classList.contains('active'));
+}
+
+// Android / browser back button → close modal instead of exiting app
+window.addEventListener('popstate', (e) => {
+  const openId = getAnyOpenModal();
+  if (openId) {
+    closeModal(openId);
+    // Keep a history entry so next back still works for other modals
+    if (modalStack.length) {
+      try { history.pushState({ modal: modalStack[modalStack.length - 1] }, ''); } catch (err) {}
+    } else {
+      try { history.pushState({ app: true }, ''); } catch (err) {}
+    }
+  }
+});
+
+// Build flat navigation path: All → Bank/Accounts → Bank/Cards → ... → Login/...
+function buildNavPath() {
+  const tree = getCategoryTree();
+  const path = [{ cat: 'All', sub: null }];
+  Object.keys(tree).forEach(cat => {
+    const subs = tree[cat] || [];
+    if (!subs.length) {
+      path.push({ cat, sub: null });
+    } else {
+      subs.forEach(sub => path.push({ cat, sub }));
+    }
+  });
+  return path;
+}
+
+function navPathIndex() {
+  const path = buildNavPath();
+  let idx = path.findIndex(p => p.cat === currentFilter && p.sub === currentSubFilter);
+  if (idx < 0) idx = path.findIndex(p => p.cat === currentFilter);
+  if (idx < 0) idx = 0;
+  return idx;
+}
+
+function goNavPath(delta) {
+  const path = buildNavPath();
+  let idx = navPathIndex() + delta;
+  if (idx < 0) idx = 0;
+  if (idx >= path.length) idx = path.length - 1;
+  const target = path[idx];
+  
+  currentFilter = target.cat;
+  currentSubFilter = target.sub;
+  buildFilterChips();
+  renderEntries();
+  
+  const label = target.cat === 'All'
+    ? 'All'
+    : (target.sub ? target.cat + ' › ' + target.sub : target.cat);
+  showToast(label);
+}
+
+// Swipe left / right — continuous categories + sub-categories
+let touchStartX = 0;
+let touchStartY = 0;
+document.addEventListener('touchstart', (e) => {
+  if (!e.touches[0]) return;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  if (!e.changedTouches[0]) return;
+  if (getAnyOpenModal()) return;
+  if (document.getElementById('main-app')?.classList.contains('hidden')) return;
+  
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
+  
+  // left swipe = next, right swipe = previous
+  goNavPath(dx < 0 ? 1 : -1);
+}, { passive: true });
+
+// --- IndexedDB ---
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbGet(key) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbSet(key, value) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const req = tx.objectStore(STORE_NAME).put(value, key);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// --- Crypto ---
+function bufToBase64(buf) {
+  // Chunked conversion — large files pe spread (...) se "Maximum call stack size exceeded" aata tha
+  const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  const chunkSize = 0x8000; // 32 KB chunks
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+    binary += String.fromCharCode.apply(null, chunk);
+  }
+  return btoa(binary);
+}
+function base64ToBuf(b64) {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function deriveKey(password, salt) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 310000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function encryptData(data, key) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const enc = new TextEncoder();
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv }, key, enc.encode(JSON.stringify(data))
+  );
+  return { iv: bufToBase64(iv), data: bufToBase64(ciphertext) };
+}
+
+async function decryptData(encrypted, key) {
+  const iv = base64ToBuf(encrypted.iv);
+  const data = base64ToBuf(encrypted.data);
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv }, key, data
+  );
+  return JSON.parse(new TextDecoder().decode(decrypted));
+}
+
+async function createVerifier(key) {
+  return await encryptData({ check: 'vault_ok_' + Date.now() }, key);
+}
+
+async function verifyPassword(key, verifier) {
+  try {
+    await decryptData(verifier, key);
+    return true;
+  } catch { return false; }
+}
+
+function checkStrength(pass) {
+  let score = 0;
+  if (pass.length >= 8) score++;
+  if (pass.length >= 12) score++;
+  if (/[A-Z]/.test(pass) && /[a-z]/.test(pass)) score++;
+  if (/\d/.test(pass)) score++;
+  if (/[^A-Za-z0-9]/.test(pass)) score++;
+  const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'];
+  const fill = document.getElementById('strength-fill');
+  if (fill) {
+    fill.style.width = (score * 20) + '%';
+    fill.style.background = colors[Math.min(score, 4)];
+  }
+}
+
+document.getElementById('setup-password')?.addEventListener('input', e => checkStrength(e.target.value));
+
+// ==================== THEME ====================
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const sw = document.getElementById('theme-switch');
+  if (sw) sw.checked = (theme === 'light');
+  localStorage.setItem('vault_theme', theme);
+  document.querySelector('meta[name="theme-color"]').content = theme === 'light' ? '#f0f7ff' : '#0b1220';
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+function toggleThemeFromSwitch() {
+  const sw = document.getElementById('theme-switch');
+  applyTheme(sw.checked ? 'light' : 'dark');
+}
+
+// ==================== AUTO LOCK ====================
+function resetAutoLock() {
+  lastActivity = Date.now();
+}
+
+function startAutoLockWatcher() {
+  if (autoLockTimer) clearInterval(autoLockTimer);
+  autoLockTimer = setInterval(() => {
+    if (!masterKey || autoLockSeconds === 0) return;
+    if (Date.now() - lastActivity > autoLockSeconds * 1000) {
+      lockVault();
+      showToast('Auto-locked due to inactivity');
+    }
+  }, 5000);
+}
+
+function setAutoLock() {
+  autoLockSeconds = parseInt(document.getElementById('autolock-select').value) || 0;
+  saveSettings();
+  showToast(autoLockSeconds === 0 ? 'Auto-lock disabled' : `Auto-lock: ${autoLockSeconds/60} min`);
+}
+
+async function saveSettings() {
+  const settings = {
+    autoLock: autoLockSeconds,
+    theme: document.documentElement.getAttribute('data-theme') || 'dark'
+  };
+  await idbSet(SETTINGS_KEY, settings);
+}
+
+async function loadSettings() {
+  const s = await idbGet(SETTINGS_KEY);
+  if (s) {
+    autoLockSeconds = s.autoLock ?? 300;
+    const sel = document.getElementById('autolock-select');
+    if (sel) sel.value = String(autoLockSeconds);
+    if (s.customCategories) customCategories = s.customCategories;
+    if (s.hiddenSubs) hiddenSubs = s.hiddenSubs;
+    if (s.hiddenCats) hiddenCats = s.hiddenCats;
+    if (s.savedFieldTemplates && Array.isArray(s.savedFieldTemplates)) {
+      savedFieldTemplates = s.savedFieldTemplates;
+    }
+  }
+  // Also load from localStorage backup (survives better across file opens)
+  try {
+    const ls = localStorage.getItem('vault_field_templates');
+    if (ls) {
+      const arr = JSON.parse(ls);
+      if (Array.isArray(arr) && arr.length) {
+        arr.forEach(t => {
+          if (t && !savedFieldTemplates.some(x => x.toLowerCase() === String(t).toLowerCase())) {
+            savedFieldTemplates.push(t);
+          }
+        });
+      }
+    }
+  } catch (e) {}
+  const savedTheme = localStorage.getItem('vault_theme') || 'dark';
+  applyTheme(savedTheme);
+}
+
+// Activity listeners
+['click','touchstart','keydown','scroll'].forEach(evt => {
+  document.addEventListener(evt, resetAutoLock, { passive: true });
+});
+
+// ==================== BIOMETRIC (WebAuthn) ====================
+const BIO_CRED_KEY = 'bio_credential_id';
+const BIO_ENABLED_KEY = 'bio_enabled';
+
+async function isBiometricAvailable() {
+  if (!window.PublicKeyCredential) return false;
+  try {
+    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+  } catch {
+    return false;
+  }
+}
+
+async function checkBiometricSupport() {
+  const available = await isBiometricAvailable();
+  const enabled = await idbGet(BIO_ENABLED_KEY);
+  const btn = document.getElementById('biometric-btn');
+  if (btn) {
+    btn.style.display = (available && enabled) ? 'block' : 'none';
+  }
+  // Update settings switch
+  const sw = document.getElementById('biometric-switch');
+  const statusText = document.getElementById('bio-status-text');
+  if (sw) {
+    sw.checked = !!enabled;
+    sw.disabled = !available;
+  }
+  if (statusText) {
+    if (!available) statusText.textContent = 'Is device pe biometric support nahi hai';
+    else if (enabled) statusText.textContent = 'Fingerprint / Face unlock ON hai';
+    else statusText.textContent = 'Biometric enable karein';
+  }
+}
+
+async function toggleBiometricSetting() {
+  const sw = document.getElementById('biometric-switch');
+  if (!sw) return;
+  
+  // WebAuthn does NOT work on file:// protocol
+  if (location.protocol === 'file:') {
+    sw.checked = false;
+    showToast('Biometric file:// pe kaam nahi karta');
+    alert(
+      '⚠️ Biometric Error\n\n' +
+      'Aap HTML file seedha open kar rahe ho (file://).\n' +
+      'Fingerprint / Face Unlock sirf HTTPS ya localhost pe kaam karta hai.\n\n' +
+      '✅ Solution (sabse easy):\n' +
+      '1. Is HTML file ko kisi free site pe upload karo\n' +
+      '   (Netlify Drop / GitHub Pages / Cloudflare Pages)\n' +
+      '2. HTTPS link se open karo\n' +
+      '3. Chrome → Add to Home Screen\n' +
+      '4. Phir Settings se Biometric ON karo\n\n' +
+      'Tab fingerprint properly kaam karega.'
+    );
+    return;
+  }
+  
+  const available = await isBiometricAvailable();
+  if (!available) {
+    sw.checked = false;
+    showToast('Is device / browser pe biometric support nahi hai');
+    return;
+  }
+  
+  if (sw.checked) {
+    const pass = prompt('Biometric enable karne ke liye Master Password daalein:');
+    if (!pass) {
+      sw.checked = false;
+      return;
+    }
+    
+    const saltB64 = await idbGet(SALT_KEY);
+    const verifier = await idbGet(VERIFIER_KEY);
+    if (!saltB64 || !verifier) {
+      sw.checked = false;
+      showToast('Vault setup incomplete');
+      return;
+    }
+    const salt = base64ToBuf(saltB64);
+    const key = await deriveKey(pass, salt);
+    const valid = await verifyPassword(key, verifier);
+    if (!valid) {
+      sw.checked = false;
+      showToast('Galat Master Password!');
+      return;
+    }
+    
+    try {
+      const challenge = crypto.getRandomValues(new Uint8Array(32));
+      const userId = crypto.getRandomValues(new Uint8Array(16));
+      const rpId = location.hostname || 'localhost';
+      
+      const credential = await navigator.credentials.create({
+        publicKey: {
+          challenge,
+          rp: { name: 'Secure Vault', id: rpId },
+          user: {
+            id: userId,
+            name: 'vault-user@securevault',
+            displayName: 'Secure Vault User'
+          },
+          pubKeyCredParams: [
+            { alg: -7, type: 'public-key' },
+            { alg: -257, type: 'public-key' }
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: 'platform',
+            userVerification: 'required',
+            residentKey: 'preferred'
+          },
+          timeout: 60000,
+          attestation: 'none'
+        }
+      });
+      
+      if (!credential) {
+        sw.checked = false;
+        showToast('Biometric registration cancel ho gaya');
+        return;
+      }
+      
+      const credId = bufToBase64(credential.rawId);
+      await idbSet(BIO_CRED_KEY, credId);
+      await idbSet(BIO_ENABLED_KEY, true);
+      
+      showToast('Fingerprint / Face Unlock ON ho gaya!');
+      checkBiometricSupport();
+    } catch (err) {
+      console.error(err);
+      sw.checked = false;
+      
+      let msg = 'Biometric set nahi ho paya';
+      if (err.name === 'NotAllowedError') {
+        msg = 'Aapne biometric cancel kar diya ya timeout ho gaya';
+      } else if (err.name === 'InvalidStateError') {
+        msg = 'Biometric pehle se registered hai. Pehle OFF karke try karo';
+      } else if (err.name === 'SecurityError') {
+        msg = 'Security Error: HTTPS chahiye. File seedha open mat karo.';
+      } else if (err.message) {
+        msg = 'Error: ' + err.message;
+      }
+      showToast(msg);
+      alert('Biometric Error:\n\n' + msg);
+    }
+  } else {
+    await idbSet(BIO_ENABLED_KEY, false);
+    try { await idbDelete(BIO_CRED_KEY); } catch(e) {}
+    showToast('Biometric unlock OFF kar diya');
+    checkBiometricSupport();
+  }
+}
+
+async function tryBiometric() {
+  const enabled = await idbGet(BIO_ENABLED_KEY);
+  const credIdB64 = await idbGet(BIO_CRED_KEY);
+  
+  if (!enabled || !credIdB64) {
+    showToast('Pehle Settings se Biometric enable karein');
+    return;
+  }
+  
+  try {
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const credId = base64ToBuf(credIdB64);
+    
+    const assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge,
+        allowCredentials: [{
+          id: credId,
+          type: 'public-key',
+          transports: ['internal']
+        }],
+        userVerification: 'required',
+        timeout: 60000
+      }
+    });
+    
+    if (assertion) {
+      // Biometric successful.
+      // Note: Pure client-side WebAuthn does not give us the encryption key.
+      // We still need the master password once per browser session for full security.
+      // For convenience we prompt password only if needed, but here we ask user
+      // to enter password after successful biometric as extra confirmation,
+      // OR we can auto-focus password field.
+      
+      showToast('Biometric verified! Ab Master Password daalein');
+      const passInput = document.getElementById('login-password');
+      if (passInput) {
+        passInput.focus();
+        // Optional: some users want full passwordless. 
+        // True passwordless needs PRF extension which is not universal yet.
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    if (err.name === 'NotAllowedError') {
+      showToast('Biometric cancel ya fail ho gaya');
+    } else {
+      showToast('Biometric error. Password se unlock karein');
+    }
+  }
+}
+
+// Helper for idbDelete if not present
+async function idbDelete(key) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const req = tx.objectStore(STORE_NAME).delete(key);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ==================== APP LOGIC ====================
+async function init() {
+  await loadSettings();
+  const salt = await idbGet(SALT_KEY);
+  if (!salt) {
+    document.getElementById('setup-form').classList.remove('hidden');
+  } else {
+    document.getElementById('login-form').classList.remove('hidden');
+    setTimeout(() => document.getElementById('login-password')?.focus(), 300);
+    checkBiometricSupport();
+  }
+}
+
+async function setupMasterPassword() {
+  const pass = document.getElementById('setup-password').value;
+  const confirm = document.getElementById('setup-confirm').value;
+  if (pass.length < 8) { showToast('Password kam se kam 8 characters ka hona chahiye'); return; }
+  if (pass !== confirm) { showToast('Password match nahi kar rahe'); return; }
+  
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const key = await deriveKey(pass, salt);
+  const verifier = await createVerifier(key);
+  
+  await idbSet(SALT_KEY, bufToBase64(salt));
+  await idbSet(VERIFIER_KEY, verifier);
+  await idbSet('entries', await encryptData([], key));
+  
+  masterKey = key;
+  entries = [];
+  showToast('Master Password set ho gaya!');
+  showMainApp();
+}
+
+async function unlockVault() {
+  const pass = document.getElementById('login-password').value;
+  if (!pass) { showToast('Password daalein'); return; }
+  
+  const saltB64 = await idbGet(SALT_KEY);
+  const verifier = await idbGet(VERIFIER_KEY);
+  if (!saltB64 || !verifier) { showToast('Vault setup incomplete'); return; }
+  
+  const salt = base64ToBuf(saltB64);
+  const key = await deriveKey(pass, salt);
+  const valid = await verifyPassword(key, verifier);
+  
+  if (!valid) {
+    document.getElementById('login-error').textContent = 'Galat password!';
+    document.getElementById('login-error').classList.remove('hidden');
+    return;
+  }
+  
+  masterKey = key;
+  const encryptedEntries = await idbGet('entries');
+  try {
+    entries = encryptedEntries ? await decryptData(encryptedEntries, masterKey) : [];
+  } catch { entries = []; }
+  
+  harvestFieldTemplatesFromEntries();
+  
+  document.getElementById('login-error').classList.add('hidden');
+  showMainApp();
+}
+
+function harvestFieldTemplatesFromEntries() {
+  let changed = false;
+  (entries || []).forEach(e => {
+    (e.customFields || []).forEach(cf => {
+      if (cf && cf.label) {
+        const exists = savedFieldTemplates.some(t => t.toLowerCase() === cf.label.toLowerCase());
+        if (!exists) {
+          savedFieldTemplates.push(cf.label);
+          changed = true;
+        }
+      }
+    });
+  });
+  if (changed) saveFieldTemplates();
+}
+
+function showMainApp() {
+  document.getElementById('lock-screen').classList.add('hidden');
+  document.getElementById('main-app').classList.remove('hidden');
+  buildFilterChips();
+  renderEntries();
+  startAutoLockWatcher();
+  resetAutoLock();
+  try { history.pushState({ app: true }, ''); } catch (e) {}
+}
+
+function lockVault() {
+  masterKey = null;
+  entries = [];
+  if (autoLockTimer) clearInterval(autoLockTimer);
+  document.getElementById('main-app').classList.add('hidden');
+  document.getElementById('lock-screen').classList.remove('hidden');
+  document.getElementById('login-form').classList.remove('hidden');
+  document.getElementById('setup-form').classList.add('hidden');
+  document.getElementById('login-password').value = '';
+  ['settings-modal','entry-modal','view-modal','change-pass-modal'].forEach(closeModal);
+  showToast('Vault locked');
+}
+
+// --- Filter ---
+function setFilter(cat) {
+  currentFilter = cat;
+  currentSubFilter = null;
+  buildFilterChips();
+  renderEntries();
+}
+
+function setSubFilter(sub) {
+  // Toggle accordion: same sub again → collapse
+  if (currentSubFilter === sub) {
+    currentSubFilter = null;
+  } else {
+    currentSubFilter = sub;
+  }
+  renderEntries();
+}
+
+function sortEntriesList(arr) {
+  return arr.slice().sort((a, b) => {
+    const oa = (typeof a.sortOrder === 'number') ? a.sortOrder : Number.MAX_SAFE_INTEGER;
+    const ob = (typeof b.sortOrder === 'number') ? b.sortOrder : Number.MAX_SAFE_INTEGER;
+    if (oa !== ob) return oa - ob;
+    return (b.updatedAt || 0) - (a.updatedAt || 0);
+  });
+}
+
+function matchSub(entrySub, filterSub) {
+  const sub = (entrySub || '').trim();
+  if (sub === filterSub) return true;
+  if (sub.replace(/'/g, '') === (filterSub || '').replace(/'/g, '')) return true;
+  return false;
+}
+
+function renderEntryCard(e, idx, listLen) {
+  const attCount = (e.attachments && e.attachments.length) ? e.attachments.length : 0;
+  const attBadge = attCount ? ` • 📎 ${attCount}` : '';
+  const hasCat = !!(e.category && String(e.category).trim());
+  const hasSub = !!(e.subcategory && String(e.subcategory).trim());
+  const needsCat = !hasCat || !hasSub;
+  const catLabel = hasSub
+    ? `${e.category || 'Other'} › ${e.subcategory}`
+    : (hasCat ? (e.category + ' › ?') : 'No category');
+  const num = idx + 1;
+  const warnBadge = needsCat ? '<span class="needs-cat-badge">Set category</span>' : '';
+  const canUp = idx > 0;
+  const canDown = idx < listLen - 1;
+  return `
+    <div class="entry-card ${needsCat ? 'needs-category' : ''}" style="margin-left:8px;">
+      <div class="entry-card-row">
+        <div class="entry-card-body" onclick="viewEntry('${e.id}')">
+          <div class="entry-title"><span style="color:var(--primary);font-weight:700;margin-right:6px;">${num}.</span>${escapeHtml(e.title || 'Untitled')}${warnBadge}</div>
+          ${e.username ? `<div class="entry-username">${escapeHtml(e.username)}</div>` : ''}
+          <div class="entry-meta">${escapeHtml(catLabel)} • ${formatDate(e.updatedAt)}${attBadge}</div>
+        </div>
+        <div class="reorder-btns">
+          <button type="button" class="reorder-btn" ${canUp ? '' : 'disabled'} onclick="event.stopPropagation(); moveEntry('${e.id}', -1)" title="Upar">▲</button>
+          <button type="button" class="reorder-btn" ${canDown ? '' : 'disabled'} onclick="event.stopPropagation(); moveEntry('${e.id}', 1)" title="Neeche">▼</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// --- Entries ---
+function renderEntries() {
+  const list = document.getElementById('entries-list');
+  const empty = document.getElementById('empty-state');
+  const query = (document.getElementById('search-input').value || '').toLowerCase();
+  
+  // ===== ALL tab: category + sub-category accordion (Bank jaisa), saari entries =====
+  if (currentFilter === 'All') {
+    empty.classList.add('hidden');
+    const tree = getCategoryTree();
+    const catOrder = Object.keys(tree).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    
+    // Also include categories that only exist on entries
+    entries.forEach(e => {
+      const c = e.category || 'Other';
+      if (!tree[c]) tree[c] = [];
+      const s = (e.subcategory || '').trim();
+      if (s && !tree[c].some(x => matchSub(x, s))) tree[c].push(s);
+    });
+    const allCats = [...new Set([...catOrder, ...Object.keys(tree)])]
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    
+    if (!entries.length) {
+      list.innerHTML = '';
+      empty.classList.remove('hidden');
+      empty.innerHTML = `<div class="icon">📂</div><p>Koi entry nahi hai</p><p style="font-size:13px;margin-top:4px;">+ button se naya data add karein</p>`;
+      return;
+    }
+    
+    const totalAll = entries.length;
+    const matchAll = query ? entries.filter(e => entryMatchesQuery(e, query)).length : totalAll;
+    
+    let html = `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;margin-bottom:8px;border-radius:12px;background:rgba(14,165,233,0.12);border:1px solid var(--primary);">
+        <span style="color:var(--primary);font-size:17px;font-weight:800;letter-spacing:0.3px;">${query ? 'Found: ' + matchAll + ' / ' + totalAll : 'Total entries: ' + totalAll}</span>
+        ${query ? '<span style="color:var(--primary);font-weight:600;font-size:12px;">Search active</span>' : ''}
+      </div>`;
+    let anyShown = false;
+    
+    allCats.forEach(cat => {
+      let subs = (tree[cat] || []).slice().sort((a, b) =>
+        a.localeCompare(b, undefined, { sensitivity: 'base' })
+      );
+      const catEntries = entries.filter(e => (e.category || 'Other') === cat);
+      if (!catEntries.length && !subs.length) return;
+      
+      if (query) {
+        const qMatch = catEntries.some(e => entryMatchesQuery(e, query)) ||
+          cat.toLowerCase().includes(query) ||
+          subs.some(s => s.toLowerCase().includes(query));
+        if (!qMatch) return;
+      }
+      
+      anyShown = true;
+      const catCount = query
+        ? catEntries.filter(e => entryMatchesQuery(e, query)).length
+        : catEntries.length;
+      html += `<div style="font-size:13px;font-weight:700;color:var(--primary);margin:14px 0 8px;letter-spacing:0.3px;">${escapeHtml(cat.toUpperCase())} <span style="opacity:0.75;font-weight:600;">(${catCount})</span></div>`;
+      
+      if (!subs.length) {
+        let flat = query ? catEntries.filter(e => entryMatchesQuery(e, query)) : catEntries.slice();
+        flat = sortEntriesList(flat);
+        html += flat.map((e, idx) => renderEntryCard(e, idx, flat.length)).join('');
+        return;
+      }
+      
+      let subNum = 0;
+      subs.forEach((sub) => {
+        const accKey = cat + '|||' + sub;
+        let subEntries = catEntries.filter(e => matchSub(e.subcategory, sub));
+        if (query) {
+          subEntries = subEntries.filter(e => entryMatchesQuery(e, query) || sub.toLowerCase().includes(query));
+          // if sub name matches query, show all entries in that sub
+          if (sub.toLowerCase().includes(query)) {
+            subEntries = catEntries.filter(e => matchSub(e.subcategory, sub));
+          }
+        }
+        const count = subEntries.length;
+        if (query && count === 0) return;
+        
+        // Search active → auto-expand matching subs so results visible
+        const expanded = query ? true : (currentSubFilter === accKey);
+        
+        subNum += 1;
+        html += `
+          <div class="chip ${expanded ? 'active' : ''} sub-acc-row" data-all-key="${escapeHtml(accKey)}"
+               style="width:100%;margin-bottom:6px;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+            <span><strong style="color:var(--primary);margin-right:6px;">${subNum}.</strong>${escapeHtml(sub)}</span>
+            <span style="font-size:12px;opacity:0.85;">${count}${expanded ? ' ▲' : ' ▼'}</span>
+          </div>`;
+        
+        if (expanded) {
+          subEntries = sortEntriesList(subEntries);
+          if (!subEntries.length) {
+            html += `<div style="padding:10px 16px 16px;font-size:13px;color:var(--text-muted);">Is sub-category mein koi entry nahi</div>`;
+          } else {
+            html += subEntries.map((e, idx) => renderEntryCard(e, idx, subEntries.length)).join('');
+          }
+        }
+      });
+      
+      let orphans = catEntries.filter(e => {
+        const s = (e.subcategory || '').trim();
+        if (!s) return true;
+        return !subs.some(sub => matchSub(s, sub));
+      });
+      if (query) orphans = orphans.filter(e => entryMatchesQuery(e, query));
+      if (orphans.length) {
+        orphans = sortEntriesList(orphans);
+        html += `
+          <div style="margin:10px 0 8px;padding:10px 12px;border-radius:12px;border:1.5px solid #f59e0b;background:rgba(245,158,11,0.12);">
+            <div style="font-size:13px;font-weight:700;color:#f59e0b;margin-bottom:6px;">
+              ⚠️ Sub-category nahi / Missing (${orphans.length})
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">In entries mein sub-category set nahi hai — edit karke set karo.</div>
+            ${orphans.map((e, idx) => renderEntryCard(e, idx, orphans.length)).join('')}
+          </div>`;
+      }
+    });
+    
+    if (!anyShown) {
+      list.innerHTML = `
+        <div style="padding:8px 4px 12px;font-size:13px;font-weight:700;">Found: 0 / ${totalAll}</div>`;
+      empty.classList.remove('hidden');
+      empty.innerHTML = `<div class="icon">🔍</div><p>Koi match nahi mila</p><p style="font-size:13px;margin-top:4px;">Search clear karke sab entries dekho</p>`;
+      return;
+    }
+    
+    list.innerHTML = html;
+    list.querySelectorAll('.sub-acc-row[data-all-key]').forEach(row => {
+      row.addEventListener('click', () => {
+        const key = row.getAttribute('data-all-key');
+        if (key) setSubFilter(key);
+      });
+    });
+    return;
+  }
+  
+  // ===== Category tab: accordion sub-categories, entries under selected sub =====
+  const tree = getCategoryTree();
+  const subs = tree[currentFilter] || [];
+  empty.classList.add('hidden');
+  
+  if (!subs.length) {
+    let filtered = entries.filter(e => (e.category || 'Other') === currentFilter);
+    if (query) filtered = filtered.filter(e => entryMatchesQuery(e, query));
+    filtered = sortEntriesList(filtered);
+    list.innerHTML = filtered.length
+      ? filtered.map((e, idx) => renderEntryCard(e, idx, filtered.length)).join('')
+      : `<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:14px;">Is category mein koi entry nahi</div>`;
+    return;
+  }
+  
+  let html = '';
+  if (query) {
+    const catTotal = entries.filter(e => (e.category || 'Other') === currentFilter).length;
+    const catFound = entries.filter(e => (e.category || 'Other') === currentFilter && entryMatchesQuery(e, query)).length;
+    html += `<div style="padding:4px 4px 10px;font-size:13px;font-weight:700;">Found: ${catFound} / ${catTotal}</div>`;
+  }
+  
+  subs.forEach((sub, si) => {
+    let subEntries = entries.filter(e =>
+      (e.category || 'Other') === currentFilter && matchSub(e.subcategory, sub)
+    );
+    if (query) {
+      if (sub.toLowerCase().includes(query)) {
+        // keep all in sub if sub name matches
+      } else {
+        subEntries = subEntries.filter(e => entryMatchesQuery(e, query));
+      }
+    }
+    const count = query ? subEntries.length : entries.filter(e =>
+      (e.category || 'Other') === currentFilter && matchSub(e.subcategory, sub)
+    ).length;
+    if (query && count === 0) return;
+    
+    // Search → auto-expand so results show
+    const expanded = query ? true : (currentSubFilter === sub);
+    html += `
+      <div class="chip ${expanded ? 'active' : ''} sub-acc-row" data-sub-idx="${si}"
+           style="width:100%;margin-bottom:6px;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+        <span><strong style="color:var(--primary);margin-right:6px;">${si + 1}.</strong>${escapeHtml(sub)}</span>
+        <span style="font-size:12px;opacity:0.85;">${count}${expanded ? ' ▲' : ' ▼'}</span>
+      </div>`;
+    
+    if (expanded) {
+      subEntries = sortEntriesList(subEntries);
+      if (!subEntries.length) {
+        html += `<div style="padding:10px 16px 16px;font-size:13px;color:var(--text-muted);">Is sub-category mein koi entry nahi</div>`;
+      } else {
+        html += subEntries.map((e, idx) => renderEntryCard(e, idx, subEntries.length)).join('');
+      }
+    }
+  });
+  
+  // Entries without matching sub under this category
+  let orphans = entries.filter(e => {
+    if ((e.category || 'Other') !== currentFilter) return false;
+    const s = (e.subcategory || '').trim();
+    if (!s) return true;
+    return !subs.some(sub => matchSub(s, sub));
+  });
+  if (query) orphans = orphans.filter(e => entryMatchesQuery(e, query));
+  if (orphans.length) {
+    orphans = sortEntriesList(orphans);
+    html += `
+      <div style="margin:12px 0 8px;padding:10px 12px;border-radius:12px;border:1.5px solid #f59e0b;background:rgba(245,158,11,0.12);">
+        <div style="font-size:13px;font-weight:700;color:#f59e0b;margin-bottom:6px;">
+          ⚠️ Sub-category nahi / Missing (${orphans.length})
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">In entries mein sub-category set nahi hai — edit karke set karo.</div>
+        ${orphans.map((e, idx) => renderEntryCard(e, idx, orphans.length)).join('')}
+      </div>`;
+  }
+  
+  list.innerHTML = html || `<div style="text-align:center;padding:24px;color:var(--text-muted);">Koi sub-category nahi</div>`;
+  
+  // Bind accordion taps (safe for special characters in names)
+  list.querySelectorAll('.sub-acc-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const idx = parseInt(row.getAttribute('data-sub-idx'), 10);
+      const subName = subs[idx];
+      if (subName) setSubFilter(subName);
+    });
+  });
+}
+
+async function moveEntry(id, direction) {
+  // direction: -1 = up, +1 = down — within currently visible filtered list
+  const query = (document.getElementById('search-input').value || '').toLowerCase();
+  let filtered = entries.slice();
+  if (currentFilter !== 'All') {
+    filtered = filtered.filter(e => (e.category || 'Other') === currentFilter);
+  }
+  if (currentSubFilter) {
+    filtered = filtered.filter(e => {
+      const sub = (e.subcategory || '').trim();
+      if (sub === currentSubFilter) return true;
+      if (sub.replace(/'/g, '') === currentSubFilter.replace(/'/g, '')) return true;
+      return false;
+    });
+  }
+  if (query) {
+    filtered = filtered.filter(e =>
+      (e.title || '').toLowerCase().includes(query) ||
+      (e.username || '').toLowerCase().includes(query) ||
+      (e.notes || '').toLowerCase().includes(query) ||
+      (e.category || '').toLowerCase().includes(query) ||
+      (e.subcategory || '').toLowerCase().includes(query)
+    );
+  }
+  
+  filtered.sort((a, b) => {
+    const oa = (typeof a.sortOrder === 'number') ? a.sortOrder : Number.MAX_SAFE_INTEGER;
+    const ob = (typeof b.sortOrder === 'number') ? b.sortOrder : Number.MAX_SAFE_INTEGER;
+    if (oa !== ob) return oa - ob;
+    return (b.updatedAt || 0) - (a.updatedAt || 0);
+  });
+  
+  const idx = filtered.findIndex(e => e.id === id);
+  if (idx < 0) return;
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= filtered.length) return;
+  
+  // Swap sortOrder values; assign sequential if missing
+  filtered.forEach((e, i) => {
+    if (typeof e.sortOrder !== 'number') e.sortOrder = i * 10;
+  });
+  
+  const a = filtered[idx];
+  const b = filtered[newIdx];
+  const tmp = a.sortOrder;
+  a.sortOrder = b.sortOrder;
+  b.sortOrder = tmp;
+  
+  // If equal after swap (edge case), force sequential for whole filtered list
+  if (a.sortOrder === b.sortOrder) {
+    filtered.forEach((e, i) => { e.sortOrder = i * 10; });
+    // re-swap positions by assigning
+    const orders = filtered.map(e => e.sortOrder);
+    // already sequential by index; swap items in conceptual order:
+    filtered.forEach((e, i) => { e.sortOrder = i * 10; });
+    // Move item: rebuild order so a is at newIdx
+    const ids = filtered.map(e => e.id);
+    ids.splice(idx, 1);
+    ids.splice(newIdx, 0, id);
+    ids.forEach((eid, i) => {
+      const ent = entries.find(x => x.id === eid);
+      if (ent) ent.sortOrder = i * 10;
+    });
+  }
+  
+  // Sync back to main entries array objects (already same refs)
+  await persistEntries();
+  renderEntries();
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatDate(ts) {
+  if (!ts) return '';
+  return new Date(ts).toLocaleDateString('hi-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function openAddModal() {
+  document.getElementById('entry-modal-title').textContent = 'Naya Entry';
+  document.getElementById('edit-id').value = '';
+  document.getElementById('entry-title').value = '';
+  document.getElementById('entry-username').value = '';
+  document.getElementById('entry-password').value = '';
+  document.getElementById('entry-notes').value = '';
+  document.getElementById('entry-files').value = '';
+  document.getElementById('entry-custom-category').value = '';
+  document.getElementById('entry-custom-subcategory').value = '';
+  ['opt-username','opt-password','opt-card-number','opt-card-variant','opt-card-expiry','opt-card-cvv','opt-notes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = true;
+  });
+  ['entry-card-number','entry-card-variant','entry-card-expiry','entry-card-cvv'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  pendingCustomFields = []; // empty — user adds only what they need
+  multiFieldSelectOrder = [];
+  document.getElementById('delete-entry-btn').classList.add('hidden');
+  const defCat = (currentFilter && currentFilter !== 'All') ? currentFilter : 'Bank';
+  const defSub = currentSubFilter || '';
+  fillCategorySelect(defCat, defSub);
+  updateEntryFormMode();
+  pendingAttachments = [];
+  renderAttachmentsPreview();
+  renderCustomFieldsEditor();
+  openModal('entry-modal');
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function getFileIcon(type, name) {
+  if (type.startsWith('image/')) return '🖼️';
+  if (type === 'application/pdf' || name.toLowerCase().endsWith('.pdf')) return '📄';
+  if (type.includes('word') || name.match(/\.(doc|docx)$/i)) return '📝';
+  if (type.includes('sheet') || name.match(/\.(xls|xlsx|csv)$/i)) return '📊';
+  if (type.includes('zip') || type.includes('rar') || name.match(/\.(zip|rar|7z)$/i)) return '📦';
+  if (type.startsWith('video/')) return '🎬';
+  if (type.startsWith('audio/')) return '🎵';
+  if (type.startsWith('text/')) return '📃';
+  return '📎';
+}
+
+const MAX_ENTRY_ATTACH_BYTES = 50 * 1024 * 1024; // 50 MB total per entry
+let filesLoading = 0;
+
+function getPendingAttachTotalSize() {
+  return pendingAttachments.reduce((s, a) => s + (a.size || 0), 0);
+}
+
+function handleFileSelect(event) {
+  const files = Array.from(event.target.files || []);
+  if (!files.length) return;
+  
+  const loadingEl = document.getElementById('attach-loading');
+  
+  files.forEach(file => {
+    const currentTotal = getPendingAttachTotalSize();
+    if (currentTotal + file.size > MAX_ENTRY_ATTACH_BYTES) {
+      showToast(`Total 50 MB limit cross ho jayegi. "${file.name}" skip.`);
+      return;
+    }
+    if (file.size > MAX_ENTRY_ATTACH_BYTES) {
+      showToast(`"${file.name}" 50 MB se badi hai`);
+      return;
+    }
+    
+    filesLoading++;
+    if (loadingEl) loadingEl.classList.remove('hidden');
+    
+    const reader = new FileReader();
+    reader.onload = () => {
+      pendingAttachments.push({
+        id: crypto.randomUUID(),
+        name: file.name,
+        type: file.type || 'application/octet-stream',
+        size: file.size,
+        data: reader.result // data URL — stored separately encrypted on save
+      });
+      filesLoading--;
+      if (filesLoading <= 0 && loadingEl) loadingEl.classList.add('hidden');
+      renderAttachmentsPreview();
+    };
+    reader.onerror = () => {
+      filesLoading--;
+      if (filesLoading <= 0 && loadingEl) loadingEl.classList.add('hidden');
+      showToast(`File padhne mein error: ${file.name}`);
+    };
+    reader.readAsDataURL(file);
+  });
+  
+  event.target.value = '';
+}
+
+function renderAttachmentsPreview() {
+  const container = document.getElementById('attachments-preview');
+  if (!container) return;
+  
+  if (!pendingAttachments.length) {
+    container.innerHTML = '';
+    return;
+  }
+  
+  const total = getPendingAttachTotalSize();
+  const totalLabel = `<div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">Total: ${formatFileSize(total)} / 50 MB</div>`;
+  
+  container.innerHTML = totalLabel + pendingAttachments.map((att, idx) => {
+    const isImage = (att.type || '').startsWith('image/') && att.data;
+    const thumb = isImage
+      ? `<img class="attach-thumb" src="${att.data}" alt="">`
+      : `<div class="attach-icon">${getFileIcon(att.type || '', att.name || '')}</div>`;
+    
+    return `
+      <div class="attach-item">
+        ${thumb}
+        <div class="attach-info">
+          <div class="attach-name">${escapeHtml(att.name)}</div>
+          <div class="attach-size">${formatFileSize(att.size || 0)}</div>
+        </div>
+        <button type="button" class="attach-remove" onclick="removePendingAttachment(${idx})" title="Remove">🗑️</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function removePendingAttachment(index) {
+  pendingAttachments.splice(index, 1);
+  renderAttachmentsPreview();
+}
+
+// Encrypt a single attachment blob and store in IndexedDB under att_<id>
+async function storeAttachmentBlob(attId, dataUrl) {
+  if (!masterKey) throw new Error('Vault locked');
+  const encrypted = await encryptData({ dataUrl }, masterKey);
+  await idbSet('att_' + attId, encrypted);
+}
+
+async function loadAttachmentBlob(attId) {
+  if (!masterKey) return null;
+  const encrypted = await idbGet('att_' + attId);
+  if (!encrypted) return null;
+  try {
+    const obj = await decryptData(encrypted, masterKey);
+    return obj.dataUrl || null;
+  } catch {
+    return null;
+  }
+}
+
+async function deleteAttachmentBlob(attId) {
+  try { await idbDelete('att_' + attId); } catch (e) {}
+}
+
+async function saveEntry() {
+  const title = document.getElementById('entry-title').value.trim();
+  if (!title) { showToast('Title zaroori hai'); return; }
+  
+  if (filesLoading > 0) {
+    showToast('Files abhi load ho rahi hain, thoda wait karein...');
+    return;
+  }
+  
+  if (getPendingAttachTotalSize() > MAX_ENTRY_ATTACH_BYTES) {
+    showToast('Attachments total 50 MB se zyada hain');
+    return;
+  }
+  
+  const saveBtn = document.querySelector('#entry-modal .btn-primary');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+  }
+  
+  try {
+    const id = document.getElementById('edit-id').value || crypto.randomUUID();
+    const existing = entries.find(e => e.id === id);
+    
+    // Old attachment ids (to delete removed ones)
+    const oldAttIds = (existing && existing.attachments) ? existing.attachments.map(a => a.id) : [];
+    
+    // Store each attachment separately (encrypted). Entry only keeps metadata.
+    const attMeta = [];
+    for (const att of pendingAttachments) {
+      if (att.data) {
+        // New or replaced attachment with data in memory
+        await storeAttachmentBlob(att.id, att.data);
+      } else if (att.id) {
+        // Existing attachment kept during edit (data already in IDB)
+      } else {
+        continue;
+      }
+      attMeta.push({
+        id: att.id,
+        name: att.name,
+        type: att.type,
+        size: att.size
+      });
+    }
+    
+    // Delete blobs that were removed during edit
+    const newIds = new Set(attMeta.map(a => a.id));
+    for (const oldId of oldAttIds) {
+      if (!newIds.has(oldId)) {
+        await deleteAttachmentBlob(oldId);
+      }
+    }
+    
+    const { category, subcategory } = resolveCategoryFields();
+    const cardMode = isCardSubCategory(category, subcategory);
+    
+    let sortOrder = existing && typeof existing.sortOrder === 'number'
+      ? existing.sortOrder
+      : (entries.reduce((m, e) => Math.max(m, typeof e.sortOrder === 'number' ? e.sortOrder : 0), 0) + 10);
+    
+    const entry = {
+      id,
+      title,
+      username: cardMode ? '' : (document.getElementById('opt-username')?.checked ? document.getElementById('entry-username').value.trim() : ''),
+      password: cardMode ? '' : (document.getElementById('opt-password')?.checked ? document.getElementById('entry-password').value : ''),
+      cardNumber: cardMode && document.getElementById('opt-card-number')?.checked ? (document.getElementById('entry-card-number')?.value || '').trim() : '',
+      cardVariant: cardMode && document.getElementById('opt-card-variant')?.checked ? (document.getElementById('entry-card-variant')?.value || '') : '',
+      cardExpiry: cardMode && document.getElementById('opt-card-expiry')?.checked ? (document.getElementById('entry-card-expiry')?.value || '').trim() : '',
+      cardCvv: cardMode && document.getElementById('opt-card-cvv')?.checked ? (document.getElementById('entry-card-cvv')?.value || '').trim() : '',
+      customFields: collectCustomFieldsForSave(),
+      category: category,
+      subcategory: subcategory || '',
+      notes: document.getElementById('opt-notes')?.checked ? document.getElementById('entry-notes').value.trim() : '',
+      attachments: attMeta,
+      sortOrder,
+      createdAt: existing ? existing.createdAt : Date.now(),
+      updatedAt: Date.now()
+    };
+    
+    if (existing) {
+      entries[entries.findIndex(e => e.id === id)] = entry;
+    } else {
+      entries.push(entry); // end of list; user can move up with ▲
+    }
+    
+    await persistEntries();
+    pendingAttachments = [];
+    closeModal('entry-modal');
+    renderEntries();
+    showToast(existing ? 'Entry update ho gaya' : 'Entry save ho gaya');
+  } catch (err) {
+    console.error(err);
+    showToast('Save fail: ' + (err.message || 'Storage / size error. Chhoti file try karo.'));
+    alert('Entry save nahi hui.\n\nReason: ' + (err.message || err) + '\n\nTips:\n- File size 50MB se kam rakho\n- Browser storage full to nahi?\n- Chrome use karo');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save';
+    }
+  }
+}
+
+async function persistEntries() {
+  if (!masterKey) return;
+  // entries now only have attachment metadata (small) — safe to encrypt whole list
+  await idbSet('entries', await encryptData(entries, masterKey));
+}
+
+function viewEntry(id) {
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+  currentViewId = id;
+  document.getElementById('view-title').textContent = e.title || 'Entry';
+  
+  let html = '';
+  html += viewFieldRow('Username / Email', e.username, true);
+  html += viewSecretRow('Password', e.password, 'view-pass');
+  html += viewFieldRow('Card Number', e.cardNumber, true);
+  html += viewFieldRow('Variant', e.cardVariant, true);
+  html += viewFieldRow('Expiry Date', e.cardExpiry, true);
+  html += viewSecretRow('CVV', e.cardCvv, 'view-cvv');
+  
+  if (e.customFields && e.customFields.length) {
+    e.customFields.forEach((cf, i) => {
+      if (cf && cf.label && cf.value !== undefined && String(cf.value).length) {
+        html += viewFieldRow(cf.label, cf.value, true);
+      }
+    });
+  }
+  
+  html += `
+    <div class="form-group">
+      <label>Category</label>
+      <div class="category-badge">${escapeHtml(e.category || 'Other')}${e.subcategory ? ' › ' + escapeHtml(e.subcategory) : ''}</div>
+    </div>
+  `;
+  if (e.notes && String(e.notes).trim()) {
+    const notesCopy = encodeURIComponent(e.notes);
+    html += `<div class="form-group"><label>Notes</label>
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <div style="flex:1;background:var(--bg);padding:12px;border-radius:10px;white-space:pre-wrap;font-size:14px;">${escapeHtml(e.notes)}</div>
+        <button class="btn btn-secondary btn-sm" onclick="copyText(decodeURIComponent('${notesCopy}'))">Copy</button>
+      </div></div>`;
+  }
+  
+  // Attachments — tap anywhere on row to open
+  if (e.attachments && e.attachments.length) {
+    html += `<div class="form-group"><label>Attachments (${e.attachments.length}) — tap to open</label>`;
+    e.attachments.forEach((att, idx) => {
+      const isImage = att.type && att.type.startsWith('image/');
+      const thumb = isImage
+        ? `<div class="attach-icon">🖼️</div>`
+        : `<div class="attach-icon">${getFileIcon(att.type || '', att.name || '')}</div>`;
+      
+      html += `
+        <div class="attach-item" style="cursor:pointer;" onclick="openAttachmentPreview('${e.id}', ${idx})">
+          ${thumb}
+          <div class="attach-info">
+            <div class="attach-name">${escapeHtml(att.name || 'File')}</div>
+            <div class="attach-size">${formatFileSize(att.size || 0)} • Tap to open</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); downloadAttachment('${e.id}', ${idx})">⬇️</button>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
+  
+  document.getElementById('view-content').innerHTML = html;
+  openModal('view-modal');
+}
+
+async function downloadAttachment(entryId, attIndex) {
+  const e = entries.find(x => x.id === entryId);
+  if (!e || !e.attachments || !e.attachments[attIndex]) return;
+  const att = e.attachments[attIndex];
+  
+  showToast('File load ho rahi hai...');
+  let dataUrl = att.data || null;
+  if (!dataUrl && att.id) {
+    dataUrl = await loadAttachmentBlob(att.id);
+  }
+  if (!dataUrl) {
+    showToast('Attachment load nahi ho paya');
+    return;
+  }
+  
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = att.name || 'attachment';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('Download start ho gaya');
+}
+
+async function openAttachmentPreview(entryId, attIndex) {
+  const e = entries.find(x => x.id === entryId);
+  if (!e || !e.attachments || !e.attachments[attIndex]) return;
+  const att = e.attachments[attIndex];
+  
+  showToast('File open ho rahi hai...');
+  let dataUrl = att.data || null;
+  if (!dataUrl && att.id) dataUrl = await loadAttachmentBlob(att.id);
+  if (!dataUrl) {
+    showToast('File load nahi ho payi');
+    return;
+  }
+  
+  const type = att.type || '';
+  const name = att.name || 'file';
+  
+  // Images → full screen preview
+  if (type.startsWith('image/')) {
+    const w = window.open('');
+    if (w) {
+      w.document.write(`<html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(name)}</title></head><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;"><img src="${dataUrl}" style="max-width:100%;max-height:100vh;object-fit:contain;"></body></html>`);
+    } else {
+      downloadAttachment(entryId, attIndex);
+    }
+    return;
+  }
+  
+  // PDF / text → try open in new tab
+  if (type === 'application/pdf' || type.startsWith('text/') || name.toLowerCase().endsWith('.pdf')) {
+    try {
+      const w = window.open(dataUrl, '_blank');
+      if (!w) downloadAttachment(entryId, attIndex);
+    } catch {
+      downloadAttachment(entryId, attIndex);
+    }
+    return;
+  }
+  
+  // Other files → download (Android will offer open with app)
+  downloadAttachment(entryId, attIndex);
+}
+
+function editFromView() {
+  closeModal('view-modal');
+  const e = entries.find(x => x.id === currentViewId);
+  if (!e) return;
+  document.getElementById('entry-modal-title').textContent = 'Edit Entry';
+  document.getElementById('edit-id').value = e.id;
+  document.getElementById('entry-title').value = e.title || '';
+  document.getElementById('entry-username').value = e.username || '';
+  document.getElementById('entry-password').value = e.password || '';
+  document.getElementById('entry-notes').value = e.notes || '';
+  document.getElementById('entry-files').value = '';
+  document.getElementById('entry-custom-category').value = '';
+  document.getElementById('entry-custom-subcategory').value = '';
+  const setOpt = (optId, hasVal) => {
+    const el = document.getElementById(optId);
+    if (el) el.checked = !!hasVal;
+  };
+  setOpt('opt-username', e.username && String(e.username).trim());
+  setOpt('opt-password', e.password && String(e.password).length);
+  setOpt('opt-card-number', e.cardNumber && String(e.cardNumber).trim());
+  setOpt('opt-card-variant', e.cardVariant && String(e.cardVariant).trim());
+  setOpt('opt-card-expiry', e.cardExpiry && String(e.cardExpiry).trim());
+  setOpt('opt-card-cvv', e.cardCvv && String(e.cardCvv).length);
+  setOpt('opt-notes', e.notes && String(e.notes).trim());
+  // Defaults on if nothing set (new-style empty)
+  if (!document.getElementById('opt-username')?.checked && !document.getElementById('opt-password')?.checked) {
+    setOpt('opt-username', true);
+    setOpt('opt-password', true);
+  }
+  if (!document.getElementById('opt-notes')?.checked && !(e.notes)) setOpt('opt-notes', true);
+  
+  const cn = document.getElementById('entry-card-number');
+  const cv = document.getElementById('entry-card-variant');
+  const ce = document.getElementById('entry-card-expiry');
+  const cc = document.getElementById('entry-card-cvv');
+  if (cn) cn.value = e.cardNumber || '';
+  if (cv) cv.value = e.cardVariant || '';
+  if (ce) ce.value = e.cardExpiry || '';
+  if (cc) cc.value = e.cardCvv || '';
+  
+  pendingCustomFields = (e.customFields || []).map(cf => ({
+    id: cf.id || crypto.randomUUID(),
+    label: cf.label || 'Field',
+    value: cf.value || '',
+    enabled: true
+  }));
+  renderCustomFieldsEditor();
+  
+  document.getElementById('delete-entry-btn').classList.remove('hidden');
+  
+  fillCategorySelect(e.category || 'Bank', e.subcategory || '');
+  updateEntryFormMode();
+  
+  // Existing attachments. Keep id. Include data if old format still has it embedded.
+  pendingAttachments = (e.attachments || []).map(a => ({
+    id: a.id || crypto.randomUUID(),
+    name: a.name,
+    type: a.type,
+    size: a.size,
+    data: a.data || undefined
+  }));
+  renderAttachmentsPreview();
+  
+  openModal('entry-modal');
+}
+
+async function deleteEntry() {
+  if (!confirm('Kya aap is entry ko permanently delete karna chahte ho?')) return;
+  
+  // Security: Master Password required
+  const pass = prompt('Delete ke liye Master Password daalein:');
+  if (!pass) {
+    showToast('Delete cancel ho gaya');
+    return;
+  }
+  try {
+    const saltB64 = await idbGet(SALT_KEY);
+    const verifier = await idbGet(VERIFIER_KEY);
+    const salt = base64ToBuf(saltB64);
+    const key = await deriveKey(pass, salt);
+    const valid = await verifyPassword(key, verifier);
+    if (!valid) {
+      showToast('Galat password! Entry delete nahi hui.');
+      return;
+    }
+  } catch (e) {
+    showToast('Password verify fail');
+    return;
+  }
+  
+  const id = document.getElementById('edit-id').value;
+  const existing = entries.find(e => e.id === id);
+  if (existing && existing.attachments) {
+    for (const att of existing.attachments) {
+      if (att.id) await deleteAttachmentBlob(att.id);
+    }
+  }
+  entries = entries.filter(e => e.id !== id);
+  await persistEntries();
+  pendingAttachments = [];
+  closeModal('entry-modal');
+  historyBackSafe();
+  renderEntries();
+  showToast('Entry delete ho gaya');
+}
+
+function goHomeTab() {
+  // Close any open modals and stay on home
+  ['entry-modal','view-modal','settings-modal','change-pass-modal','manage-cat-modal','pdf-pick-modal','manage-fields-modal'].forEach(closeModal);
+  historyBackSafe();
+  document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+  const home = document.getElementById('nav-home');
+  if (home) home.classList.add('active');
+}
+
+function copyText(text) {
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => showToast('Copied!')).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Copied!');
+  });
+}
+
+
+function openManageSavedFields() {
+  const sorted = savedFieldTemplates.slice().sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: 'base' })
+  );
+  fillFieldSelect('cf-template-delete', sorted, false);
+  const searchDel = document.getElementById('cf-search-del');
+  if (searchDel) {
+    searchDel.value = '';
+    searchDel.oninput = () => {
+      const q = searchDel.value.trim().toLowerCase();
+      const filtered = sorted.filter(t => t.toLowerCase().includes(q));
+      // keep full sorted for filter base - recompute from saved
+      const all = savedFieldTemplates.slice().sort((a, b) =>
+        a.localeCompare(b, undefined, { sensitivity: 'base' })
+      );
+      fillFieldSelect('cf-template-delete', all.filter(t => t.toLowerCase().includes(q)), false);
+    };
+  }
+  openModal('manage-fields-modal');
+}
+
+// --- Settings ---
+function openSettings() {
+  const sw = document.getElementById('theme-switch');
+  if (sw) sw.checked = (document.documentElement.getAttribute('data-theme') === 'light');
+  checkBiometricSupport(); // refresh biometric switch status
+  openModal('settings-modal');
+}
+
+function openChangePassword() {
+  closeModal('settings-modal');
+  document.getElementById('old-password').value = '';
+  document.getElementById('new-password').value = '';
+  document.getElementById('new-password-confirm').value = '';
+  openModal('change-pass-modal');
+}
+
+async function changeMasterPassword() {
+  const oldPass = document.getElementById('old-password').value;
+  const newPass = document.getElementById('new-password').value;
+  const confirm = document.getElementById('new-password-confirm').value;
+  
+  if (!oldPass || !newPass) { showToast('Sab fields bharna zaroori hai'); return; }
+  if (newPass.length < 8) { showToast('Naya password kam se kam 8 characters ka hona chahiye'); return; }
+  if (newPass !== confirm) { showToast('Naya password match nahi kar raha'); return; }
+  
+  const saltB64 = await idbGet(SALT_KEY);
+  const salt = base64ToBuf(saltB64);
+  const oldKey = await deriveKey(oldPass, salt);
+  const verifier = await idbGet(VERIFIER_KEY);
+  
+  if (!(await verifyPassword(oldKey, verifier))) {
+    showToast('Purana password galat hai!');
+    return;
+  }
+  
+  const newSalt = crypto.getRandomValues(new Uint8Array(16));
+  const newKey = await deriveKey(newPass, newSalt);
+  const newVerifier = await createVerifier(newKey);
+  const reEncrypted = await encryptData(entries, newKey);
+  
+  await idbSet(SALT_KEY, bufToBase64(newSalt));
+  await idbSet(VERIFIER_KEY, newVerifier);
+  await idbSet('entries', reEncrypted);
+  masterKey = newKey;
+  
+  closeModal('change-pass-modal');
+  showToast('Master Password successfully change ho gaya!');
+}
+
+// --- Backup ---
+async function idbGetAllKeys() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).getAllKeys();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function exportBackup() {
+  if (!masterKey) return;
+  showToast('Backup ban raha hai (attachments ke saath)...');
+  
+  try {
+    const salt = await idbGet(SALT_KEY);
+    const verifier = await idbGet(VERIFIER_KEY);
+    const encryptedEntries = await idbGet('entries');
+    
+    // Collect all attachment blobs so they restore on new phone
+    const attachments = {};
+    let attCount = 0;
+    
+    // From current entries metadata
+    for (const e of entries) {
+      if (!e.attachments) continue;
+      for (const att of e.attachments) {
+        if (!att.id) continue;
+        const key = 'att_' + att.id;
+        if (attachments[key]) continue;
+        const blob = await idbGet(key);
+        if (blob) {
+          attachments[key] = blob;
+          attCount++;
+        }
+      }
+    }
+    
+    // Also pick any att_* keys that might exist
+    try {
+      const allKeys = await idbGetAllKeys();
+      for (const k of allKeys) {
+        if (typeof k === 'string' && k.startsWith('att_') && !attachments[k]) {
+          const blob = await idbGet(k);
+          if (blob) {
+            attachments[k] = blob;
+            attCount++;
+          }
+        }
+      }
+    } catch (e) { /* ignore */ }
+    
+    const backup = {
+      version: 2,
+      type: 'SecureVaultBackup',
+      createdAt: new Date().toISOString(),
+      brand: 'AJEET PARMAR',
+      salt,
+      verifier,
+      entries: encryptedEntries,
+      attachments: attachments // encrypted attachment blobs
+    };
+    
+    const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `SecureVault_Backup_${new Date().toISOString().slice(0,10)}.vault`;
+    a.click();
+    URL.revokeObjectURL(url);
+    closeModal('settings-modal');
+    showToast(`Backup ready! (${attCount} attachments included)`);
+  } catch (err) {
+    console.error(err);
+    showToast('Backup fail: ' + (err.message || 'error'));
+  }
+}
+
+async function importBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    showToast('Backup padh raha hai...');
+    const text = await file.text();
+    const backup = JSON.parse(text);
+    if (backup.type !== 'SecureVaultBackup' || !backup.salt || !backup.entries) {
+      showToast('Invalid backup file'); return;
+    }
+    const pass = prompt('Is backup ka Master Password daalein:');
+    if (!pass) return;
+    
+    const salt = base64ToBuf(backup.salt);
+    const key = await deriveKey(pass, salt);
+    if (!(await verifyPassword(key, backup.verifier))) {
+      showToast('Backup ka password galat hai'); return;
+    }
+    
+    let importedEntries = [];
+    try { importedEntries = await decryptData(backup.entries, key); }
+    catch { showToast('Backup decrypt nahi ho paya'); return; }
+    
+    const attMap = backup.attachments || {};
+    const attKeys = Object.keys(attMap);
+    const attMsg = attKeys.length
+      ? `\n${attKeys.length} attachment files bhi restore hongi.`
+      : '\n(Is backup mein attachments nahi hain — purana backup ho to files gayab ho sakti hain)';
+    
+    if (!confirm(`Backup se ${importedEntries.length} entries restore hongi.${attMsg}\nCurrent data replace ho jaayega. Continue?`)) return;
+    
+    // Restore entries with CURRENT master key (re-encrypt)
+    entries = importedEntries;
+    
+    // Handle old-format attachments still embedded as data in entry
+    for (const e of entries) {
+      if (!e.attachments) continue;
+      for (const att of e.attachments) {
+        if (att.data && att.id) {
+          await storeAttachmentBlob(att.id, att.data);
+          delete att.data; // keep only metadata in entry
+        }
+      }
+    }
+    
+    await persistEntries();
+    
+    // Restore attachment files:
+    // Blobs in backup are encrypted with backup password (key).
+    // Decrypt with backup key → re-encrypt & store with current masterKey.
+    let restoredAtt = 0;
+    for (const [storeKey, encBlob] of Object.entries(attMap)) {
+      try {
+        const plain = await decryptData(encBlob, key); // decrypt with backup password key
+        if (plain && plain.dataUrl) {
+          const attId = storeKey.replace(/^att_/, '');
+          await storeAttachmentBlob(attId, plain.dataUrl); // encrypt with current masterKey
+          restoredAtt++;
+        }
+      } catch (err) {
+        console.warn('Attachment restore fail:', storeKey, err);
+      }
+    }
+    
+    renderEntries();
+    closeModal('settings-modal');
+    showToast(`Restore ho gaya! ${importedEntries.length} entries, ${restoredAtt} files.`);
+  } catch (err) {
+    console.error(err);
+    showToast('Backup file padhne mein error: ' + (err.message || ''));
+  }
+  event.target.value = '';
+}
+
+// ==================== PDF EXPORT ====================
+// Clean text for jsPDF Helvetica (removes characters that break rendering)
+function pdfSafe(str) {
+  if (!str) return '';
+  return String(str)
+    // Normalize common special spaces / zero-width chars
+    .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, ' ')
+    // Replace fancy bullets / symbols with plain ASCII
+    .replace(/[•·●○▪▫]/g, '-')
+    .replace(/[–—]/g, '-')
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/₹/g, 'Rs.')
+    // Remove control characters and other problematic Unicode that Helvetica can't draw
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+    // Keep only printable Latin + common punctuation + digits (Helvetica-safe range mostly)
+    // Allow extended Latin where possible; strip remaining high-plane / combining garbage
+    .replace(/[^\x20-\x7E\u00A0-\u00FF\n\r\t]/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .trim();
+}
+
+function openPdfExportPicker() {
+  if (!entries || entries.length === 0) {
+    showToast('Koi entry nahi hai PDF ke liye');
+    return;
+  }
+  const box = document.getElementById('pdf-pick-list');
+  if (!box) return;
+  
+  // Group for UI
+  const tree = {};
+  entries.forEach(e => {
+    const cat = e.category || 'Other';
+    const sub = (e.subcategory && String(e.subcategory).trim()) ? e.subcategory : '(No Sub-Category)';
+    if (!tree[cat]) tree[cat] = {};
+    if (!tree[cat][sub]) tree[cat][sub] = [];
+    tree[cat][sub].push(e);
+  });
+  
+  let html = '';
+  Object.keys(tree).sort().forEach(cat => {
+    const catId = 'pdf-cat-' + encodeURIComponent(cat);
+    html += `<div style="margin-bottom:14px;border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--bg);">`;
+    html += `<label style="display:flex;align-items:center;gap:8px;font-weight:700;cursor:pointer;">
+      <input type="checkbox" class="pdf-cat" data-cat="${escapeHtml(cat)}" checked onchange="pdfToggleCat(this)" style="width:auto;accent-color:var(--primary);">
+      ${escapeHtml(cat)}
+    </label>`;
+    Object.keys(tree[cat]).sort().forEach(sub => {
+      html += `<div style="margin:8px 0 4px 16px;">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:700;cursor:pointer;font-size:13px;">
+          <input type="checkbox" class="pdf-sub" data-cat="${escapeHtml(cat)}" data-sub="${escapeHtml(sub)}" checked onchange="pdfToggleSub(this)" style="width:auto;accent-color:var(--primary);">
+          ${escapeHtml(sub)}
+        </label>
+      </div>`;
+      tree[cat][sub].forEach(e => {
+        html += `<label style="display:flex;align-items:center;gap:8px;margin:4px 0 4px 32px;cursor:pointer;font-size:13px;font-weight:500;">
+          <input type="checkbox" class="pdf-entry" data-id="${e.id}" data-cat="${escapeHtml(cat)}" data-sub="${escapeHtml(sub)}" checked style="width:auto;accent-color:var(--primary);">
+          ${escapeHtml(e.title || 'Untitled')}
+        </label>`;
+      });
+    });
+    html += `</div>`;
+  });
+  box.innerHTML = html;
+  openModal('pdf-pick-modal');
+}
+
+function pdfToggleCat(el) {
+  const cat = el.getAttribute('data-cat');
+  const on = el.checked;
+  document.querySelectorAll('.pdf-sub, .pdf-entry').forEach(c => {
+    if (c.getAttribute('data-cat') === cat) c.checked = on;
+  });
+}
+
+function pdfToggleSub(el) {
+  const cat = el.getAttribute('data-cat');
+  const sub = el.getAttribute('data-sub');
+  const on = el.checked;
+  document.querySelectorAll('.pdf-entry').forEach(c => {
+    if (c.getAttribute('data-cat') === cat && c.getAttribute('data-sub') === sub) c.checked = on;
+  });
+}
+
+function pdfPickSelectAll(on) {
+  document.querySelectorAll('#pdf-pick-list input[type=checkbox]').forEach(c => { c.checked = on; });
+}
+
+async function startSelectedPdfExport() {
+  const ids = [];
+  document.querySelectorAll('.pdf-entry:checked').forEach(c => {
+    if (c.getAttribute('data-id')) ids.push(c.getAttribute('data-id'));
+  });
+  if (!ids.length) {
+    showToast('Kam se kam 1 entry select karo');
+    return;
+  }
+  closeModal('pdf-pick-modal');
+  await exportToPDF(ids);
+}
+
+async function exportToPDF(selectedIds) {
+  if (!entries || entries.length === 0) {
+    showToast('Koi entry nahi hai PDF ke liye');
+    return;
+  }
+  
+  const exportEntries = selectedIds && selectedIds.length
+    ? entries.filter(e => selectedIds.includes(e.id))
+    : entries.slice();
+  
+  if (!exportEntries.length) {
+    showToast('Koi entry select nahi hui');
+    return;
+  }
+  
+  // PDF password = Master Password (user must enter again for security)
+  const pdfPass = prompt('PDF pe password lagane ke liye apna Master Password daalein:\n(Yahi password PDF open karne ke liye chahiye hoga)');
+  if (!pdfPass) {
+    showToast('PDF export cancel ho gaya');
+    return;
+  }
+  
+  // Verify it is the correct master password
+  try {
+    const saltB64 = await idbGet(SALT_KEY);
+    const verifier = await idbGet(VERIFIER_KEY);
+    if (!saltB64 || !verifier) {
+      showToast('Vault setup incomplete');
+      return;
+    }
+    const salt = base64ToBuf(saltB64);
+    const key = await deriveKey(pdfPass, salt);
+    const valid = await verifyPassword(key, verifier);
+    if (!valid) {
+      showToast('Galat Master Password! PDF export nahi hua.');
+      return;
+    }
+  } catch (err) {
+    showToast('Password verify nahi ho paya');
+    return;
+  }
+  
+  const { jsPDF } = window.jspdf;
+  
+  // Create PDF with encryption - same master password protects the PDF
+  let doc;
+  try {
+    doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      encryption: {
+        userPassword: pdfPass,
+        ownerPassword: pdfPass + '_AJEET_PARMAR_OWNER',
+        // Include modify so internal index links work in Chrome
+        userPermissions: ['print', 'copy', 'modify', 'annot-forms']
+      }
+    });
+  } catch (encErr) {
+    // Fallback if encryption not supported in this jsPDF build
+    console.warn('PDF encryption failed, creating without password:', encErr);
+    doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    showToast('Warning: Is browser mein PDF password support limited hai');
+  }
+  
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 16;
+  const usableWidth = pageWidth - margin * 2;
+  const footerReserve = 22; // space reserved for footer
+  const lineH = 4.2; // line height for body text
+  let y = 22;
+  
+  function ensureSpace(needed) {
+    if (y + needed > pageHeight - footerReserve) {
+      doc.addPage();
+      y = 20;
+    }
+  }
+  
+  // Portfolio-style blue theme (from reference table)
+  const PC = {
+    blue: [30, 90, 168],
+    blueDark: [20, 60, 120],
+    white: [255, 255, 255],
+    body: [33, 37, 41],
+    muted: [100, 110, 120],
+    rowAlt: [245, 247, 250],
+    rowBg: [255, 255, 255],
+    border: [210, 218, 228],
+    softLine: [230, 235, 240],
+    redLine: [240, 150, 150]
+  };
+  
+  // ===== PAGE 1: COVER =====
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(...PC.blue);
+  doc.text('IMPORTANT DATA', pageWidth / 2, y, { align: 'center' });
+  y += 7;
+  
+  doc.setFontSize(11);
+  doc.setTextColor(...PC.blueDark);
+  doc.text('AJEET PARMAR', pageWidth / 2, y, { align: 'center' });
+  y += 6;
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...PC.muted);
+  doc.text('Personal Data Export - Confidential', pageWidth / 2, y, { align: 'center' });
+  y += 5;
+  doc.text('Generated: ' + new Date().toLocaleString('en-IN'), pageWidth / 2, y, { align: 'center' });
+  y += 6;
+  
+  doc.setDrawColor(...PC.blue);
+  doc.setLineWidth(0.6);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 14;
+  
+  // Professional cover notices (AJEET PARMAR bold)
+  function drawNoticeWithBoldName(prefix, suffix) {
+    doc.setFontSize(10);
+    doc.setTextColor(40);
+    const name = 'AJEET PARMAR';
+    const full = prefix + name + suffix;
+    const lines = doc.splitTextToSize(full, usableWidth);
+    lines.forEach(line => {
+      const idx = line.indexOf(name);
+      if (idx < 0) {
+        doc.setFont('helvetica', 'normal');
+        doc.text(line, pageWidth / 2, y, { align: 'center' });
+      } else {
+        const before = line.substring(0, idx);
+        const after = line.substring(idx + name.length);
+        doc.setFont('helvetica', 'normal');
+        const wBefore = doc.getTextWidth(before);
+        doc.setFont('helvetica', 'bold');
+        const wBold = doc.getTextWidth(name);
+        doc.setFont('helvetica', 'normal');
+        const wAfter = doc.getTextWidth(after);
+        let x = (pageWidth - (wBefore + wBold + wAfter)) / 2;
+        if (before) { doc.setFont('helvetica', 'normal'); doc.text(before, x, y); x += wBefore; }
+        doc.setFont('helvetica', 'bold');
+        doc.text(name, x, y);
+        x += wBold;
+        if (after) { doc.setFont('helvetica', 'normal'); doc.text(after, x, y); }
+      }
+      y += 6;
+    });
+    y += 5;
+  }
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(...PC.blue);
+  doc.text('CONFIDENTIAL — AUTHORIZED ACCESS ONLY', pageWidth / 2, y, { align: 'center' });
+  y += 10;
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(...PC.body);
+  const coverPara1 = doc.splitTextToSize(
+    'This document contains sensitive personal, financial, and private information. Unauthorized viewing, copying, sharing, or distribution is strictly prohibited.',
+    usableWidth
+  );
+  coverPara1.forEach(line => { doc.text(line, pageWidth / 2, y, { align: 'center' }); y += 5.5; });
+  y += 6;
+  
+  drawNoticeWithBoldName(
+    'All data contained herein is the exclusive property of ',
+    '. Custody and ownership rest solely with the named individual.'
+  );
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...PC.muted);
+  const coverPara2 = doc.splitTextToSize(
+    'If this document is found, please return it immediately to the rightful owner. Handle with care and maintain strict confidentiality at all times.',
+    usableWidth
+  );
+  coverPara2.forEach(line => { doc.text(line, pageWidth / 2, y, { align: 'center' }); y += 5; });
+  
+  // Group: category → subcategory → entries (only selected)
+  const categories = {};
+  exportEntries.forEach(e => {
+    const cat = e.category || 'Other';
+    const sub = (e.subcategory && String(e.subcategory).trim()) ? e.subcategory : '(No Sub-Category)';
+    if (!categories[cat]) categories[cat] = {};
+    if (!categories[cat][sub]) categories[cat][sub] = [];
+    categories[cat][sub].push(e);
+  });
+  
+  // Index: each category starts new page — estimate pages
+  const tocRowH = 8;
+  const tocUsableH = pageHeight - 50 - footerReserve;
+  let tocPagesNeeded = 0;
+  Object.keys(categories).forEach(cat => {
+    let n = 0;
+    Object.keys(categories[cat]).forEach(sub => { n += categories[cat][sub].length; });
+    tocPagesNeeded += Math.max(1, Math.ceil((n + 3) * tocRowH / tocUsableH));
+  });
+  tocPagesNeeded = Math.max(1, tocPagesNeeded);
+  
+  // Reserve index pages (page 2+)
+  for (let i = 0; i < tocPagesNeeded; i++) {
+    doc.addPage();
+  }
+  
+  const tocEntries = []; // { cat, sub, title, page }
+  
+  function drawEntryBlock(e, cat, sub) {
+    const title = pdfSafe(e.title || 'Untitled');
+    const username = pdfSafe(e.username || '');
+    const password = pdfSafe(e.password || '');
+    const notes = pdfSafe(e.notes || '');
+    const contentWidth = usableWidth - 8;
+    const bodyLines = [];
+    
+    if (e.cardNumber) bodyLines.push(...doc.splitTextToSize('Card: ' + pdfSafe(e.cardNumber), contentWidth));
+    if (e.cardVariant) bodyLines.push('Variant: ' + pdfSafe(e.cardVariant));
+    if (e.cardExpiry) bodyLines.push('Expiry: ' + pdfSafe(e.cardExpiry));
+    if (e.cardCvv) bodyLines.push('CVV: ' + pdfSafe(e.cardCvv));
+    if (username) bodyLines.push(...doc.splitTextToSize('Username: ' + username, contentWidth));
+    if (password) bodyLines.push(...doc.splitTextToSize('Password: ' + password, contentWidth));
+    if (e.customFields && e.customFields.length) {
+      e.customFields.forEach(cf => {
+        if (cf && cf.label && cf.value) {
+          bodyLines.push(...doc.splitTextToSize(pdfSafe(cf.label) + ': ' + pdfSafe(cf.value), contentWidth));
+        }
+      });
+    }
+    if (notes) {
+      const noteParas = notes.split('\n');
+      let first = true;
+      noteParas.forEach(para => {
+        const p = para.trim();
+        if (!p) { bodyLines.push(''); return; }
+        const prefix = first ? 'Notes: ' : '';
+        first = false;
+        bodyLines.push(...doc.splitTextToSize(prefix + p, contentWidth));
+      });
+    }
+    if (e.attachments && e.attachments.length) {
+      bodyLines.push('Attachments (' + e.attachments.length + '):');
+      e.attachments.forEach((att, i) => {
+        const label = (i + 1) + '. ' + pdfSafe(att.name || 'file') +
+          (att.size ? ' (' + formatFileSize(att.size) + ')' : '');
+        bodyLines.push(...doc.splitTextToSize(label, contentWidth));
+      });
+    }
+    
+    const titleH = 5.5;
+    const bodyH = bodyLines.length * lineH;
+    const padTop = 4;
+    const padBottom = 4;
+    const blockHeight = padTop + titleH + bodyH + padBottom;
+    ensureSpace(blockHeight + 4);
+    
+    // Record page for index (after ensureSpace so page is final)
+    const pageNow = doc.internal.getNumberOfPages();
+    tocEntries.push({
+      cat: pdfSafe(cat),
+      sub: pdfSafe(sub),
+      title: title,
+      page: pageNow
+    });
+    
+    const cardY = y;
+    doc.setDrawColor(...PC.border);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(...PC.rowAlt);
+    doc.roundedRect(margin, cardY, usableWidth, blockHeight, 2, 2, 'FD');
+    // Blue left accent bar (table-style)
+    doc.setFillColor(...PC.blue);
+    doc.rect(margin, cardY, 1.2, blockHeight, 'F');
+    
+    let ty = cardY + padTop + 3.5;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10.5);
+    doc.setTextColor(...PC.body);
+    doc.text(doc.splitTextToSize(title, contentWidth)[0] || 'Untitled', margin + 5, ty);
+    ty += titleH;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...PC.body);
+    bodyLines.forEach(line => {
+      doc.text(line, margin + 4, ty);
+      ty += lineH;
+    });
+    y = cardY + blockHeight + 4;
+  }
+  
+  const catKeys = Object.keys(categories).sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: 'base' })
+  );
+  catKeys.forEach((cat) => {
+    doc.addPage();
+    y = 22;
+    
+    // Blue header bar (portfolio table style)
+    doc.setFillColor(...PC.blue);
+    doc.roundedRect(margin, y - 6, usableWidth, 12, 1.5, 1.5, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(...PC.white);
+    doc.text(pdfSafe(cat.toUpperCase()), pageWidth / 2, y + 2, { align: 'center' });
+    y += 14;
+    
+    // Sub-categories A–Z
+    const subKeys = Object.keys(categories[cat]).sort((a, b) => {
+      if (a === '(No Sub-Category)') return 1;
+      if (b === '(No Sub-Category)') return -1;
+      return a.localeCompare(b, undefined, { sensitivity: 'base' });
+    });
+    
+    subKeys.forEach((sub, subIdx) => {
+      if (subIdx > 0) {
+        doc.addPage();
+        y = 22;
+        doc.setFillColor(...PC.blue);
+        doc.roundedRect(margin, y - 5, usableWidth, 10, 1.5, 1.5, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(...PC.white);
+        doc.text(pdfSafe(cat.toUpperCase()), pageWidth / 2, y + 1.5, { align: 'center' });
+        y += 12;
+      }
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(...PC.blue);
+      doc.text(pdfSafe(sub), margin, y);
+      y += 4;
+      doc.setDrawColor(...PC.blue);
+      doc.setLineWidth(0.4);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 6;
+      
+      // Alphabetical A–Z by title
+      const list = categories[cat][sub].slice().sort((a, b) =>
+        (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' })
+      );
+      
+      list.forEach(e => drawEntryBlock(e, cat, sub));
+    });
+  });
+  
+  // ===== FILL INDEX — notebook lines, new page per category, title always INDEX =====
+  function startIndexPage(catName) {
+    doc.setPage(tocPage);
+    y = 20;
+    // INDEX title in blue header bar
+    doc.setFillColor(...PC.blue);
+    doc.roundedRect(margin, y - 5, usableWidth, 11, 1.5, 1.5, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(...PC.white);
+    doc.text('INDEX', pageWidth / 2, y + 2, { align: 'center' });
+    y += 12;
+    // Category name — left side, larger font
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(...PC.blue);
+    doc.text(pdfSafe((catName || '').toUpperCase()), margin, y);
+    y += 5;
+    doc.setDrawColor(...PC.blue);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 4;
+    
+    // Notebook ruled lines background
+    const lineStart = y;
+    const lineEnd = pageHeight - footerReserve - 4;
+    doc.setDrawColor(...PC.softLine);
+    doc.setLineWidth(0.25);
+    for (let ly = lineStart; ly < lineEnd; ly += tocRowH) {
+      doc.line(margin, ly, pageWidth - margin, ly);
+    }
+    // Left margin RED line (keep as requested)
+    doc.setDrawColor(...PC.redLine);
+    doc.setLineWidth(0.4);
+    doc.line(margin + 8, lineStart - 2, margin + 8, lineEnd);
+    
+    y = lineStart + 5.5;
+  }
+  
+  // Group TOC by category
+  const tocByCat = {};
+  tocEntries.forEach(item => {
+    if (!tocByCat[item.cat]) tocByCat[item.cat] = [];
+    tocByCat[item.cat].push(item);
+  });
+  // A–Z within each category index
+  Object.keys(tocByCat).forEach(c => {
+    tocByCat[c].sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }));
+  });
+  
+  let tocPage = 2;
+  const tocCatKeys = Object.keys(tocByCat).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  
+  tocCatKeys.forEach((cat, catIdx) => {
+    if (catIdx > 0) tocPage++;
+    startIndexPage(cat);
+    
+    let idxNum = 0;
+    tocByCat[cat].forEach((item) => {
+      if (y > pageHeight - footerReserve - 10) {
+        tocPage++;
+        startIndexPage(cat);
+      }
+      idxNum++;
+      const targetPage = parseInt(item.page, 10) || 1;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...PC.blue); // blue = clickable
+      const left = idxNum + '. ' + item.title;
+      const leftTrim = doc.splitTextToSize(left, usableWidth - 55)[0];
+      
+      // textWithLink works more reliably in Chrome than link() alone
+      try {
+        doc.textWithLink(leftTrim, margin + 12, y, { pageNumber: targetPage });
+      } catch (e1) {
+        doc.text(leftTrim, margin + 12, y);
+      }
+      
+      const pageLabel = 'p.' + targetPage;
+      const metaExtra = (item.sub && item.sub !== '(No Sub-Category)' ? item.sub + ' · ' : '');
+      doc.setTextColor(100);
+      const metaW = doc.getTextWidth(pageLabel);
+      if (metaExtra) {
+        doc.text(metaExtra, pageWidth - margin - metaW - 2, y, { align: 'right' });
+      }
+      doc.setTextColor(...PC.blue);
+      try {
+        doc.textWithLink(pageLabel, pageWidth - margin - metaW, y, { pageNumber: targetPage });
+      } catch (e2) {
+        doc.text(pageLabel, pageWidth - margin, y, { align: 'right' });
+      }
+      
+      // Full-row invisible hot zone (Chrome desktop + many viewers)
+      const linkTop = y - 5;
+      const linkH = Math.max(tocRowH - 1, 6);
+      try {
+        doc.link(margin, linkTop, usableWidth, linkH, { pageNumber: targetPage });
+      } catch (e3) {}
+      
+      // Underline to show it's tappable
+      doc.setDrawColor(...PC.blue);
+      doc.setLineWidth(0.2);
+      doc.line(margin + 12, y + 1, margin + 12 + doc.getTextWidth(leftTrim), y + 1);
+      
+      y += tocRowH;
+    });
+  });
+  
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    addFooter(doc, pageWidth, pageHeight, i, totalPages);
+  }
+  
+  doc.save(`SecureVault_Export_${new Date().toISOString().slice(0,10)}_AJEET_PARMAR.pdf`);
+  closeModal('settings-modal');
+  showToast('PDF download ho gaya! Open karne ke liye Master Password use karo.');
+}
+
+function addFooter(doc, pageWidth, pageHeight, pageNum, totalPages) {
+  const footerY = pageHeight - 10;
+  
+  doc.setDrawColor(30, 90, 168);
+  doc.setLineWidth(0.4);
+  doc.line(16, footerY - 6, pageWidth - 16, footerY - 6);
+  
+  // Official brand - center
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(30, 90, 168);
+  doc.text('AJEET PARMAR', pageWidth / 2, footerY - 2, { align: 'center' });
+  
+  // Page number - RIGHT bottom corner
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(100, 110, 120);
+  if (pageNum && totalPages) {
+    doc.text('Page ' + pageNum + ' of ' + totalPages, pageWidth - 16, footerY + 2, { align: 'right' });
+  }
+  
+  // Left
+  doc.setFontSize(8);
+  doc.setTextColor(100, 110, 120);
+  doc.text('Confidential - Secure Vault', 16, footerY + 2);
+}
+
+async function confirmClearAll() {
+  if (!confirm('Kya aap SACH mein saara data permanently delete karna chahte ho?\nYeh action undo nahi ho sakta.')) return;
+  if (!confirm('Last warning: Sab entries + master password reset ho jaayega.')) return;
+  
+  // Security password required
+  const pass = prompt('Clear All Data ke liye Master Password daalein:');
+  if (!pass) {
+    showToast('Clear All cancel ho gaya');
+    return;
+  }
+  try {
+    const saltB64 = await idbGet(SALT_KEY);
+    const verifier = await idbGet(VERIFIER_KEY);
+    if (!saltB64 || !verifier) {
+      showToast('Vault setup incomplete');
+      return;
+    }
+    const salt = base64ToBuf(saltB64);
+    const key = await deriveKey(pass, salt);
+    const valid = await verifyPassword(key, verifier);
+    if (!valid) {
+      showToast('Galat password! Data clear nahi hua.');
+      return;
+    }
+  } catch (e) {
+    showToast('Password verify fail');
+    return;
+  }
+  
+  indexedDB.deleteDatabase(DB_NAME);
+  localStorage.removeItem('vault_theme');
+  masterKey = null;
+  entries = [];
+  location.reload();
+}
+
+// Share / Email single entry (text + attachments)
+async function shareEntry(entryId) {
+  const e = entries.find(x => x.id === entryId);
+  if (!e) return;
+  
+  showToast('Entry prepare ho rahi hai...');
+  
+  let text = 'IMPORTANT DATA — Entry Share\n';
+  text += 'AJEET PARMAR\n';
+  text += '────────────────────\n';
+  text += 'Title: ' + (e.title || '') + '\n';
+  if (e.category) text += 'Category: ' + e.category + (e.subcategory ? ' › ' + e.subcategory : '') + '\n';
+  if (e.cardNumber) text += 'Card Number: ' + e.cardNumber + '\n';
+  if (e.cardVariant) text += 'Variant: ' + e.cardVariant + '\n';
+  if (e.cardExpiry) text += 'Expiry: ' + e.cardExpiry + '\n';
+  if (e.cardCvv) text += 'CVV: ' + e.cardCvv + '\n';
+  if (e.username) text += 'Username: ' + e.username + '\n';
+  if (e.password) text += 'Password: ' + e.password + '\n';
+  if (e.customFields && e.customFields.length) {
+    e.customFields.forEach(cf => {
+      if (cf && cf.label) text += cf.label + ': ' + (cf.value || '') + '\n';
+    });
+  }
+  if (e.notes) text += 'Notes:\n' + e.notes + '\n';
+  if (e.attachments && e.attachments.length) {
+    text += 'Attachments: ' + e.attachments.length + ' file(s)\n';
+    e.attachments.forEach((a, i) => {
+      text += '  ' + (i + 1) + '. ' + (a.name || 'file') + (a.size ? ' (' + formatFileSize(a.size) + ')' : '') + '\n';
+    });
+  }
+  text += '────────────────────\n';
+  
+  // Build File objects from attachments for Web Share
+  const files = [];
+  if (e.attachments && e.attachments.length) {
+    for (const att of e.attachments) {
+      try {
+        let dataUrl = att.data || null;
+        if (!dataUrl && att.id) dataUrl = await loadAttachmentBlob(att.id);
+        if (!dataUrl) continue;
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], att.name || 'attachment', {
+          type: att.type || blob.type || 'application/octet-stream'
+        });
+        files.push(file);
+      } catch (err) {
+        console.warn('Share attach fail', err);
+      }
+    }
+  }
+  
+  // Prefer Web Share API (Android Chrome supports files)
+  if (navigator.share) {
+    try {
+      const shareData = {
+        title: e.title || 'Secure Entry',
+        text: text
+      };
+      if (files.length && navigator.canShare && navigator.canShare({ files })) {
+        shareData.files = files;
+      } else if (files.length) {
+        // Some browsers accept files without canShare
+        try { shareData.files = files; } catch (e2) {}
+      }
+      await navigator.share(shareData);
+      showToast('Share sheet open ho gaya');
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        showToast('Share cancel');
+        return;
+      }
+      console.warn('Share failed, fallback', err);
+    }
+  }
+  
+  // Fallback: copy text + download attachments + open mailto
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('Entry text copy ho gaya');
+  } catch (e) {}
+  
+  for (const f of files) {
+    const url = URL.createObjectURL(f);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = f.name;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  
+  const mailto = 'mailto:?subject=' + encodeURIComponent(e.title || 'Entry') +
+    '&body=' + encodeURIComponent(text.substring(0, 1800));
+  window.location.href = mailto;
+  showToast('Email app open — attachments download folder mein hain');
+}
+
+// Start
+init();
+</script>
+
+<script>
+// PWA service worker (GitHub Pages / HTTPS only)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').then(function (reg) {
+      console.log('SW registered', reg.scope);
+    }).catch(function (err) {
+      console.warn('SW register failed', err);
+    });
+  });
+}
+// Optional: capture install prompt
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', function (e) {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  var btn = document.getElementById('pwa-install-btn');
+  if (btn) btn.style.display = 'block';
+});
+function triggerPwaInstall() {
+  if (!deferredInstallPrompt) {
+    if (typeof showToast === 'function') showToast('Install: Chrome menu ⋮ → Install app / Add to Home screen');
+    else alert('Chrome menu ⋮ → Install app / Add to Home screen');
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(function () {
+    deferredInstallPrompt = null;
+    var btn = document.getElementById('pwa-install-btn');
+    if (btn) btn.style.display = 'none';
+  });
+}
+</script>
+</body>
+</html>
