@@ -278,8 +278,8 @@
   }
   .modal-overlay.active { opacity: 1; visibility: visible; }
   /* Attachment viewer must sit ABOVE entry view modal */
-  #att-viewer-modal { z-index: 300; }
-  #att-viewer-modal.active { z-index: 300; }
+  #att-viewer-modal { z-index: 9999; }
+  #att-viewer-modal.active { z-index: 9999; }
   .modal {
     background: var(--card);
     width: 100%;
@@ -3024,15 +3024,34 @@ function dataUrlToBlob(dataUrl) {
   try {
     const parts = String(dataUrl).split(',');
     const meta = parts[0] || '';
-    const b64 = parts[1] || '';
+    const b64 = parts.slice(1).join(','); // in case commas in data
     const mime = (meta.match(/data:([^;]+)/) || [])[1] || 'application/octet-stream';
     const bin = atob(b64);
     const arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    const chunk = 0x8000;
+    for (let i = 0; i < bin.length; i += chunk) {
+      const end = Math.min(i + chunk, bin.length);
+      for (let j = i; j < end; j++) arr[j] = bin.charCodeAt(j);
+    }
     return new Blob([arr], { type: mime });
   } catch (e) {
     console.warn('dataUrlToBlob fail', e);
     return null;
+  }
+}
+
+async function dataUrlToBlobAsync(dataUrl, forceType) {
+  try {
+    const res = await fetch(dataUrl);
+    let blob = await res.blob();
+    if (forceType && blob.type !== forceType) {
+      blob = new Blob([blob], { type: forceType });
+    }
+    return blob;
+  } catch (e) {
+    const b = dataUrlToBlob(dataUrl);
+    if (b && forceType) return new Blob([b], { type: forceType });
+    return b;
   }
 }
 
@@ -3229,9 +3248,12 @@ async function downloadAttachment(entryId, attIndex) {
   }
   
   const fileName = att.name || 'attachment';
+  const isPdf = (att.type || '').includes('pdf') || /\.pdf$/i.test(fileName);
   try {
-    const blob = dataUrlToBlob(dataUrl);
+    let blob = await dataUrlToBlobAsync(dataUrl, isPdf ? 'application/pdf' : (att.type || undefined));
+    if (!blob) blob = dataUrlToBlob(dataUrl);
     if (!blob) throw new Error('blob fail');
+    if (isPdf) blob = new Blob([blob], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -3274,57 +3296,109 @@ async function openAttachmentPreview(entryId, attIndex) {
   if (!e || !e.attachments || !e.attachments[attIndex]) return;
   const att = e.attachments[attIndex];
   
-  showToast('File open ho rahi hai...');
+  showToast('File load ho rahi hai...');
   let dataUrl = att.data || null;
   if (!dataUrl && att.id) dataUrl = await loadAttachmentBlob(att.id);
   if (!dataUrl) {
-    showToast('File missing — purane device se naya backup restore karein (attachments include)');
+    showToast('File data missing — backup me file nahi thi ya restore incomplete');
     return;
   }
   
-  const type = att.type || '';
+  const type = (att.type || '').toLowerCase();
   const name = att.name || 'file';
-  const blob = dataUrlToBlob(dataUrl);
+  const isImg = type.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name);
+  const isPdf = type === 'application/pdf' || type.includes('pdf') || /\.pdf$/i.test(name);
+  
+  const forceType = isPdf ? 'application/pdf' : (isImg ? (type || 'image/jpeg') : (type || 'application/octet-stream'));
+  let blob = await dataUrlToBlobAsync(dataUrl, forceType);
   if (!blob) {
     showToast('File read fail');
     return;
   }
+  // Ensure PDF mime
+  if (isPdf && blob.type !== 'application/pdf') {
+    blob = new Blob([blob], { type: 'application/pdf' });
+  }
+  
   if (_attViewerUrl) {
     try { URL.revokeObjectURL(_attViewerUrl); } catch (e) {}
   }
   _attViewerUrl = URL.createObjectURL(blob);
   
-  const isImg = type.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name);
-  const isPdf = type === 'application/pdf' || /\.pdf$/i.test(name);
-  
-  // In-app viewer (works in installed PWA — no popup block)
   const titleEl = document.getElementById('att-viewer-title');
   const bodyEl = document.getElementById('att-viewer-body');
   const dlBtn = document.getElementById('att-viewer-dl-btn');
   if (titleEl) titleEl.textContent = name;
-  if (dlBtn) dlBtn.onclick = () => downloadAttachment(entryId, attIndex);
+  if (dlBtn) {
+    dlBtn.onclick = function (ev) {
+      if (ev) ev.stopPropagation();
+      downloadAttachment(entryId, attIndex);
+    };
+  }
   
-  if (bodyEl) {
-    if (isImg) {
-      bodyEl.innerHTML = `<img src="${_attViewerUrl}" alt="" style="max-width:100%;max-height:100%;object-fit:contain;">`;
-      openModal('att-viewer-modal'); const __av=document.getElementById('att-viewer-modal'); if(__av) __av.style.zIndex='300';
-      return;
-    }
-    if (isPdf) {
-      bodyEl.innerHTML = `<iframe src="${_attViewerUrl}" style="width:100%;height:100%;border:none;background:#fff;"></iframe>`;
-      openModal('att-viewer-modal'); const __av=document.getElementById('att-viewer-modal'); if(__av) __av.style.zIndex='300';
-      return;
-    }
-    // other types → download / share
+  if (!bodyEl) {
+    await downloadAttachment(entryId, attIndex);
+    return;
+  }
+  
+  if (isImg) {
+    bodyEl.innerHTML = `<img src="${_attViewerUrl}" alt="" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+  } else if (isPdf) {
+    // Android PWA often blocks PDF iframe — show controls + try embed/object
+    bodyEl.innerHTML = `
+      <div style="width:100%;height:100%;display:flex;flex-direction:column;background:#111;">
+        <div style="padding:12px;text-align:center;color:#eee;font-size:13px;flex-shrink:0;">
+          PDF preview mobile pe limit ho sakti hai. Neeche se Download / Open try karo.
+        </div>
+        <div style="flex:1;min-height:0;position:relative;">
+          <object data="${_attViewerUrl}" type="application/pdf" style="width:100%;height:100%;">
+            <embed src="${_attViewerUrl}" type="application/pdf" style="width:100%;height:100%;"/>
+          </object>
+        </div>
+        <div style="padding:12px;display:flex;gap:8px;flex-shrink:0;">
+          <button type="button" class="btn btn-primary" style="flex:1;" id="att-pdf-open-btn">📂 Open PDF</button>
+          <button type="button" class="btn btn-secondary" style="flex:1;" id="att-pdf-dl-btn2">⬇️ Download</button>
+        </div>
+      </div>`;
+  } else {
     bodyEl.innerHTML = `<div style="color:#ccc;text-align:center;padding:24px;">
       <div style="font-size:40px;margin-bottom:12px;">📄</div>
       <div style="font-weight:700;margin-bottom:8px;">${escapeHtml(name)}</div>
-      <div style="font-size:13px;opacity:0.8;">Preview nahi — Download / Share use karo</div>
+      <div style="font-size:13px;opacity:0.8;margin-bottom:16px;">Preview nahi — Download use karo</div>
+      <button type="button" class="btn btn-primary" id="att-other-dl">⬇️ Download</button>
     </div>`;
-    openModal('att-viewer-modal'); const __av=document.getElementById('att-viewer-modal'); if(__av) __av.style.zIndex='300';
-  } else {
-    await downloadAttachment(entryId, attIndex);
   }
+  
+  openModal('att-viewer-modal');
+  const ov = document.getElementById('att-viewer-modal');
+  if (ov) {
+    ov.style.zIndex = '9999';
+    ov.classList.add('active');
+  }
+  
+  // Wire PDF buttons after DOM insert
+  setTimeout(() => {
+    const openBtn = document.getElementById('att-pdf-open-btn');
+    const dl2 = document.getElementById('att-pdf-dl-btn2');
+    const otherDl = document.getElementById('att-other-dl');
+    if (openBtn) {
+      openBtn.onclick = function (ev) {
+        if (ev) ev.stopPropagation();
+        // Open blob in same webview / external
+        try {
+          const w = window.open(_attViewerUrl, '_blank');
+          if (!w) {
+            // fallback: navigate top (may leave app) — use download instead
+            downloadAttachment(entryId, attIndex);
+          }
+        } catch (e) {
+          downloadAttachment(entryId, attIndex);
+        }
+      };
+    }
+    if (dl2) dl2.onclick = function (ev) { if (ev) ev.stopPropagation(); downloadAttachment(entryId, attIndex); };
+    if (otherDl) otherDl.onclick = function (ev) { if (ev) ev.stopPropagation(); downloadAttachment(entryId, attIndex); };
+  }, 50);
 }
 
 function editFromView() {
