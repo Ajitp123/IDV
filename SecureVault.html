@@ -3247,7 +3247,10 @@ async function downloadAttachment(entryId, attIndex) {
     return;
   }
   
-  const fileName = att.name || 'attachment';
+  let fileName = att.name || 'attachment';
+  if (((att.type || '').includes('pdf') || /\.pdf$/i.test(fileName)) && !/\.pdf$/i.test(fileName)) {
+    fileName = fileName + '.pdf';
+  }
   const isPdf = (att.type || '').includes('pdf') || /\.pdf$/i.test(fileName);
   try {
     let blob = await dataUrlToBlobAsync(dataUrl, isPdf ? 'application/pdf' : (att.type || undefined));
@@ -3344,21 +3347,19 @@ async function openAttachmentPreview(entryId, attIndex) {
   if (isImg) {
     bodyEl.innerHTML = `<img src="${_attViewerUrl}" alt="" style="max-width:100%;max-height:100%;object-fit:contain;">`;
   } else if (isPdf) {
-    // Android PWA often blocks PDF iframe — show controls + try embed/object
+    // Mobile Chrome/PWA: in-app PDF often shows UUID + Open only.
+    // Best UX: offer Download with REAL filename + Open in external viewer.
+    const safeName = (name && /\.pdf$/i.test(name)) ? name : ((name || 'document') + '.pdf');
     bodyEl.innerHTML = `
-      <div style="width:100%;height:100%;display:flex;flex-direction:column;background:#111;">
-        <div style="padding:12px;text-align:center;color:#eee;font-size:13px;flex-shrink:0;">
-          PDF preview mobile pe limit ho sakti hai. Neeche se Download / Open try karo.
+      <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0f172a;padding:24px;box-sizing:border-box;text-align:center;">
+        <div style="font-size:48px;margin-bottom:12px;">📄</div>
+        <div style="color:#f8fafc;font-weight:700;font-size:16px;margin-bottom:8px;word-break:break-word;">${escapeHtml(safeName)}</div>
+        <div style="color:#94a3b8;font-size:13px;line-height:1.45;margin-bottom:20px;max-width:320px;">
+          Mobile app mein PDF preview limit hai.<br>
+          <b style="color:#e2e8f0;">Download</b> dabao, phir Files / Downloads se PDF open karo.
         </div>
-        <div style="flex:1;min-height:0;position:relative;">
-          <object data="${_attViewerUrl}" type="application/pdf" style="width:100%;height:100%;">
-            <embed src="${_attViewerUrl}" type="application/pdf" style="width:100%;height:100%;"/>
-          </object>
-        </div>
-        <div style="padding:12px;display:flex;gap:8px;flex-shrink:0;">
-          <button type="button" class="btn btn-primary" style="flex:1;" id="att-pdf-open-btn">📂 Open PDF</button>
-          <button type="button" class="btn btn-secondary" style="flex:1;" id="att-pdf-dl-btn2">⬇️ Download</button>
-        </div>
+        <button type="button" class="btn btn-primary" style="width:100%;max-width:280px;margin-bottom:10px;padding:14px;" id="att-pdf-dl-main">⬇️ Download PDF</button>
+        <button type="button" class="btn btn-secondary" style="width:100%;max-width:280px;padding:14px;" id="att-pdf-open-btn">📂 Open / Share</button>
       </div>`;
   } else {
     bodyEl.innerHTML = `<div style="color:#ccc;text-align:center;padding:24px;">
@@ -3376,28 +3377,58 @@ async function openAttachmentPreview(entryId, attIndex) {
     ov.classList.add('active');
   }
   
-  // Wire PDF buttons after DOM insert
+  // Wire PDF / other buttons after DOM insert
   setTimeout(() => {
     const openBtn = document.getElementById('att-pdf-open-btn');
-    const dl2 = document.getElementById('att-pdf-dl-btn2');
+    const dlMain = document.getElementById('att-pdf-dl-main');
     const otherDl = document.getElementById('att-other-dl');
-    if (openBtn) {
-      openBtn.onclick = function (ev) {
-        if (ev) ev.stopPropagation();
-        // Open blob in same webview / external
-        try {
-          const w = window.open(_attViewerUrl, '_blank');
-          if (!w) {
-            // fallback: navigate top (may leave app) — use download instead
-            downloadAttachment(entryId, attIndex);
+    
+    async function doNamedDownload() {
+      const fileName = (att.name && /\.pdf$/i.test(att.name))
+        ? att.name
+        : ((att.name || 'document').replace(/\.pdf$/i, '') + '.pdf');
+      try {
+        let blob = await dataUrlToBlobAsync(dataUrl, 'application/pdf');
+        if (!blob) blob = dataUrlToBlob(dataUrl);
+        if (!blob) throw new Error('blob');
+        blob = new Blob([blob], { type: 'application/pdf' });
+        
+        // Share sheet with real filename (best on Android)
+        if (navigator.share && navigator.canShare) {
+          try {
+            const file = new File([blob], fileName, { type: 'application/pdf' });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({ files: [file], title: fileName });
+              showToast('Share / Save / Open with PDF app');
+              return;
+            }
+          } catch (se) {
+            if (se && se.name === 'AbortError') return;
           }
-        } catch (e) {
-          downloadAttachment(entryId, attIndex);
         }
-      };
+        
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 15000);
+        showToast('Download: ' + fileName);
+      } catch (err) {
+        console.error(err);
+        showToast('Download fail');
+      }
     }
-    if (dl2) dl2.onclick = function (ev) { if (ev) ev.stopPropagation(); downloadAttachment(entryId, attIndex); };
+    
+    if (dlMain) dlMain.onclick = function (ev) { if (ev) ev.stopPropagation(); doNamedDownload(); };
+    if (openBtn) openBtn.onclick = function (ev) { if (ev) ev.stopPropagation(); doNamedDownload(); };
     if (otherDl) otherDl.onclick = function (ev) { if (ev) ev.stopPropagation(); downloadAttachment(entryId, attIndex); };
+    
+    // Footer Download button already wired
+    if (dlBtn) dlBtn.onclick = function (ev) { if (ev) ev.stopPropagation(); doNamedDownload(); };
   }, 50);
 }
 
