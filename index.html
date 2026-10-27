@@ -277,9 +277,6 @@
     transition: all 0.25s;
   }
   .modal-overlay.active { opacity: 1; visibility: visible; }
-  /* Attachment viewer must sit ABOVE entry view modal */
-  #att-viewer-modal { z-index: 9999; }
-  #att-viewer-modal.active { z-index: 9999; }
   .modal {
     background: var(--card);
     width: 100%;
@@ -572,21 +569,6 @@
 </style>
 </head>
 <body>
-  <!-- ATTACHMENT VIEWER (works in installed PWA) -->
-  <div class="modal-overlay" id="att-viewer-modal">
-    <div class="modal" style="max-width:100%;width:100%;height:92vh;max-height:92vh;display:flex;flex-direction:column;padding:0;overflow:hidden;">
-      <div class="modal-header" style="padding:12px 16px;flex-shrink:0;">
-        <div class="modal-title" id="att-viewer-title" style="font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:75%;">File</div>
-        <button class="close-btn" onclick="closeAttViewer()">×</button>
-      </div>
-      <div id="att-viewer-body" style="flex:1;overflow:auto;background:#0a0a0a;display:flex;align-items:center;justify-content:center;padding:8px;"></div>
-      <div style="padding:10px 12px;flex-shrink:0;display:flex;gap:8px;">
-        <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeAttViewer()">Close</button>
-        <button type="button" class="btn btn-primary" style="flex:1;" id="att-viewer-dl-btn">⬇️ Download</button>
-      </div>
-    </div>
-  </div>
-
   <!-- LOCK SCREEN -->
   <div id="lock-screen">
     <div class="lock-icon">🔒</div>
@@ -1825,7 +1807,7 @@ function historyBackSafe() {
 }
 
 function getAnyOpenModal() {
-  const ids = ['view-modal','entry-modal','settings-modal','change-pass-modal','manage-cat-modal','pdf-pick-modal','manage-fields-modal','att-viewer-modal'];
+  const ids = ['view-modal','entry-modal','settings-modal','change-pass-modal','manage-cat-modal','pdf-pick-modal','manage-fields-modal'];
   return ids.find(id => document.getElementById(id)?.classList.contains('active'));
 }
 
@@ -2110,8 +2092,6 @@ async function loadSettings() {
 // ==================== BIOMETRIC (WebAuthn) ====================
 const BIO_CRED_KEY = 'bio_credential_id';
 const BIO_ENABLED_KEY = 'bio_enabled';
-const BIO_WRAP_KEY = 'bio_wrap_secret'; // wraps master password for convenience unlock after WebAuthn
-
 
 async function isBiometricAvailable() {
   if (!window.PublicKeyCredential) return false;
@@ -2138,7 +2118,7 @@ async function checkBiometricSupport() {
   }
   if (statusText) {
     if (!available) statusText.textContent = 'Is device pe biometric support nahi hai';
-    else if (enabled) statusText.textContent = 'ON — fingerprint se seedha unlock';
+    else if (enabled) statusText.textContent = 'Fingerprint / Face unlock ON hai';
     else statusText.textContent = 'Biometric enable karein';
   }
 }
@@ -2232,20 +2212,9 @@ async function toggleBiometricSetting() {
       
       const credId = bufToBase64(credential.rawId);
       await idbSet(BIO_CRED_KEY, credId);
-      // Wrap master password so fingerprint can unlock without typing password again
-      // (device + biometric gate; full offline security still relies on not sharing device)
-      const wrapKeyBytes = crypto.getRandomValues(new Uint8Array(32));
-      const wrapKey = await crypto.subtle.importKey(
-        'raw', wrapKeyBytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']
-      );
-      const wrapped = await encryptData({ password: pass }, wrapKey);
-      await idbSet(BIO_WRAP_KEY, {
-        wrapKey: bufToBase64(wrapKeyBytes),
-        payload: wrapped
-      });
       await idbSet(BIO_ENABLED_KEY, true);
       
-      showToast('Fingerprint / Face Unlock ON — ab password ke bina open hoga');
+      showToast('Fingerprint / Face Unlock ON ho gaya!');
       checkBiometricSupport();
     } catch (err) {
       console.error(err);
@@ -2267,7 +2236,6 @@ async function toggleBiometricSetting() {
   } else {
     await idbSet(BIO_ENABLED_KEY, false);
     try { await idbDelete(BIO_CRED_KEY); } catch(e) {}
-    try { await idbDelete(BIO_WRAP_KEY); } catch(e) {}
     showToast('Biometric unlock OFF kar diya');
     checkBiometricSupport();
   }
@@ -2276,7 +2244,6 @@ async function toggleBiometricSetting() {
 async function tryBiometric() {
   const enabled = await idbGet(BIO_ENABLED_KEY);
   const credIdB64 = await idbGet(BIO_CRED_KEY);
-  const wrap = await idbGet(BIO_WRAP_KEY);
   
   if (!enabled || !credIdB64) {
     showToast('Pehle Settings se Biometric enable karein');
@@ -2284,7 +2251,6 @@ async function tryBiometric() {
   }
   
   try {
-    showToast('Fingerprint / Face verify ho raha hai...');
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     const credId = base64ToBuf(credIdB64);
     
@@ -2301,60 +2267,22 @@ async function tryBiometric() {
       }
     });
     
-    if (!assertion) {
-      showToast('Biometric fail');
-      return;
-    }
-    
-    // Fingerprint OK → unwrap master password and open vault (no second password)
-    if (!wrap || !wrap.wrapKey || !wrap.payload) {
-      showToast('Biometric data purana hai. Settings → OFF → ON karke phir set karo');
+    if (assertion) {
+      // Biometric successful.
+      // Note: Pure client-side WebAuthn does not give us the encryption key.
+      // We still need the master password once per browser session for full security.
+      // For convenience we prompt password only if needed, but here we ask user
+      // to enter password after successful biometric as extra confirmation,
+      // OR we can auto-focus password field.
+      
+      showToast('Biometric verified! Ab Master Password daalein');
       const passInput = document.getElementById('login-password');
-      if (passInput) passInput.focus();
-      return;
-    }
-    
-    const wrapKey = await crypto.subtle.importKey(
-      'raw', base64ToBuf(wrap.wrapKey), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']
-    );
-    const plain = await decryptData(wrap.payload, wrapKey);
-    const pass = plain && plain.password;
-    if (!pass) {
-      showToast('Biometric secret invalid. Settings se phir enable karo');
-      return;
-    }
-    
-    const saltB64 = await idbGet(SALT_KEY);
-    const verifier = await idbGet(VERIFIER_KEY);
-    if (!saltB64 || !verifier) {
-      showToast('Vault setup incomplete');
-      return;
-    }
-    const salt = base64ToBuf(saltB64);
-    const key = await deriveKey(pass, salt);
-    if (!(await verifyPassword(key, verifier))) {
-      showToast('Biometric password mismatch. Settings se Biometric OFF→ON karo');
-      try { await idbDelete(BIO_WRAP_KEY); } catch (e) {}
-      return;
-    }
-    
-    masterKey = key;
-    const encryptedEntries = await idbGet('entries');
-    if (encryptedEntries) {
-      try {
-        entries = await decryptData(encryptedEntries, masterKey);
-      } catch (e) {
-        entries = [];
+      if (passInput) {
+        passInput.focus();
+        // Optional: some users want full passwordless. 
+        // True passwordless needs PRF extension which is not universal yet.
       }
-    } else {
-      entries = [];
     }
-    if (!Array.isArray(entries)) entries = [];
-    
-    showToast('Fingerprint se unlock ho gaya!');
-    showMainApp();
-    buildFilterChips();
-    renderEntries();
   } catch (err) {
     console.error(err);
     if (err.name === 'NotAllowedError') {
@@ -2992,66 +2920,14 @@ async function storeAttachmentBlob(attId, dataUrl) {
 }
 
 async function loadAttachmentBlob(attId) {
-  if (!masterKey) {
-    console.warn('loadAttachmentBlob: vault locked');
-    return null;
-  }
-  if (!attId) return null;
-  const key = String(attId).startsWith('att_') ? String(attId) : ('att_' + attId);
-  let encrypted = await idbGet(key);
-  if (!encrypted && key !== 'att_' + attId) {
-    encrypted = await idbGet('att_' + attId);
-  }
-  if (!encrypted) {
-    console.warn('loadAttachmentBlob: missing in IDB', key);
-    return null;
-  }
+  if (!masterKey) return null;
+  const encrypted = await idbGet('att_' + attId);
+  if (!encrypted) return null;
   try {
-    // Already a plain dataUrl string (legacy)
-    if (typeof encrypted === 'string' && encrypted.startsWith('data:')) return encrypted;
     const obj = await decryptData(encrypted, masterKey);
-    if (!obj) return null;
-    if (typeof obj === 'string' && obj.startsWith('data:')) return obj;
-    return obj.dataUrl || obj.data || null;
-  } catch (err) {
-    console.warn('loadAttachmentBlob decrypt fail', attId, err);
+    return obj.dataUrl || null;
+  } catch {
     return null;
-  }
-}
-
-/** dataUrl → Blob for reliable download/open on mobile PWA */
-function dataUrlToBlob(dataUrl) {
-  try {
-    const parts = String(dataUrl).split(',');
-    const meta = parts[0] || '';
-    const b64 = parts.slice(1).join(','); // in case commas in data
-    const mime = (meta.match(/data:([^;]+)/) || [])[1] || 'application/octet-stream';
-    const bin = atob(b64);
-    const arr = new Uint8Array(bin.length);
-    const chunk = 0x8000;
-    for (let i = 0; i < bin.length; i += chunk) {
-      const end = Math.min(i + chunk, bin.length);
-      for (let j = i; j < end; j++) arr[j] = bin.charCodeAt(j);
-    }
-    return new Blob([arr], { type: mime });
-  } catch (e) {
-    console.warn('dataUrlToBlob fail', e);
-    return null;
-  }
-}
-
-async function dataUrlToBlobAsync(dataUrl, forceType) {
-  try {
-    const res = await fetch(dataUrl);
-    let blob = await res.blob();
-    if (forceType && blob.type !== forceType) {
-      blob = new Blob([blob], { type: forceType });
-    }
-    return blob;
-  } catch (e) {
-    const b = dataUrlToBlob(dataUrl);
-    if (b && forceType) return new Blob([b], { type: forceType });
-    return b;
   }
 }
 
@@ -3215,7 +3091,7 @@ function viewEntry(id) {
         : `<div class="attach-icon">${getFileIcon(att.type || '', att.name || '')}</div>`;
       
       html += `
-        <div class="attach-item" style="cursor:pointer;" onclick="event.stopPropagation(); openAttachmentPreview('${e.id}', ${idx})">
+        <div class="attach-item" style="cursor:pointer;" onclick="openAttachmentPreview('${e.id}', ${idx})">
           ${thumb}
           <div class="attach-info">
             <div class="attach-name">${escapeHtml(att.name || 'File')}</div>
@@ -3243,55 +3119,17 @@ async function downloadAttachment(entryId, attIndex) {
     dataUrl = await loadAttachmentBlob(att.id);
   }
   if (!dataUrl) {
-    showToast('Attachment load nahi hua — file data missing ho sakti hai');
+    showToast('Attachment load nahi ho paya');
     return;
   }
   
-  let fileName = att.name || 'attachment';
-  if (((att.type || '').includes('pdf') || /\.pdf$/i.test(fileName)) && !/\.pdf$/i.test(fileName)) {
-    fileName = fileName + '.pdf';
-  }
-  const isPdf = (att.type || '').includes('pdf') || /\.pdf$/i.test(fileName);
-  try {
-    let blob = await dataUrlToBlobAsync(dataUrl, isPdf ? 'application/pdf' : (att.type || undefined));
-    if (!blob) blob = dataUrlToBlob(dataUrl);
-    if (!blob) throw new Error('blob fail');
-    if (isPdf) blob = new Blob([blob], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
-    showToast('Download start — Downloads folder check karo');
-    
-    // Optional share sheet (after download attempt) on mobile
-    if (navigator.share && navigator.canShare) {
-      try {
-        const file = new File([blob], fileName, { type: att.type || blob.type || 'application/octet-stream' });
-        if (navigator.canShare({ files: [file] })) {
-          // don't await force — user already has download
-        }
-      } catch (e) {}
-    }
-  } catch (err) {
-    console.error(err);
-    showToast('Download fail: ' + (err.message || 'error'));
-  }
-}
-
-let _attViewerUrl = null;
-function closeAttViewer() {
-  closeModal('att-viewer-modal');
-  if (_attViewerUrl) {
-    try { URL.revokeObjectURL(_attViewerUrl); } catch (e) {}
-    _attViewerUrl = null;
-  }
-  const body = document.getElementById('att-viewer-body');
-  if (body) body.innerHTML = '';
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = att.name || 'attachment';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('Download start ho gaya');
 }
 
 async function openAttachmentPreview(entryId, attIndex) {
@@ -3299,141 +3137,44 @@ async function openAttachmentPreview(entryId, attIndex) {
   if (!e || !e.attachments || !e.attachments[attIndex]) return;
   const att = e.attachments[attIndex];
   
-  showToast('File load ho rahi hai...');
+  showToast('File open ho rahi hai...');
   let dataUrl = att.data || null;
   if (!dataUrl && att.id) dataUrl = await loadAttachmentBlob(att.id);
   if (!dataUrl) {
-    showToast('File data missing — backup me file nahi thi ya restore incomplete');
+    showToast('File load nahi ho payi');
     return;
   }
   
-  const type = (att.type || '').toLowerCase();
+  const type = att.type || '';
   const name = att.name || 'file';
-  const isImg = type.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name);
-  const isPdf = type === 'application/pdf' || type.includes('pdf') || /\.pdf$/i.test(name);
   
-  const forceType = isPdf ? 'application/pdf' : (isImg ? (type || 'image/jpeg') : (type || 'application/octet-stream'));
-  let blob = await dataUrlToBlobAsync(dataUrl, forceType);
-  if (!blob) {
-    showToast('File read fail');
-    return;
-  }
-  // Ensure PDF mime
-  if (isPdf && blob.type !== 'application/pdf') {
-    blob = new Blob([blob], { type: 'application/pdf' });
-  }
-  
-  if (_attViewerUrl) {
-    try { URL.revokeObjectURL(_attViewerUrl); } catch (e) {}
-  }
-  _attViewerUrl = URL.createObjectURL(blob);
-  
-  const titleEl = document.getElementById('att-viewer-title');
-  const bodyEl = document.getElementById('att-viewer-body');
-  const dlBtn = document.getElementById('att-viewer-dl-btn');
-  if (titleEl) titleEl.textContent = name;
-  if (dlBtn) {
-    dlBtn.onclick = function (ev) {
-      if (ev) ev.stopPropagation();
+  // Images → full screen preview
+  if (type.startsWith('image/')) {
+    const w = window.open('');
+    if (w) {
+      w.document.write(`<html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(name)}</title></head><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;"><img src="${dataUrl}" style="max-width:100%;max-height:100vh;object-fit:contain;"></body></html>`);
+    } else {
       downloadAttachment(entryId, attIndex);
-    };
-  }
-  
-  if (!bodyEl) {
-    await downloadAttachment(entryId, attIndex);
+    }
     return;
   }
   
-  if (isImg) {
-    bodyEl.innerHTML = `<img src="${_attViewerUrl}" alt="" style="max-width:100%;max-height:100%;object-fit:contain;">`;
-  } else if (isPdf) {
-    // Mobile Chrome/PWA: in-app PDF often shows UUID + Open only.
-    // Best UX: offer Download with REAL filename + Open in external viewer.
-    const safeName = (name && /\.pdf$/i.test(name)) ? name : ((name || 'document') + '.pdf');
-    bodyEl.innerHTML = `
-      <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0f172a;padding:24px;box-sizing:border-box;text-align:center;">
-        <div style="font-size:48px;margin-bottom:12px;">📄</div>
-        <div style="color:#f8fafc;font-weight:700;font-size:16px;margin-bottom:8px;word-break:break-word;">${escapeHtml(safeName)}</div>
-        <div style="color:#94a3b8;font-size:13px;line-height:1.45;margin-bottom:20px;max-width:320px;">
-          Mobile app mein PDF preview limit hai.<br>
-          <b style="color:#e2e8f0;">Download</b> dabao, phir Files / Downloads se PDF open karo.
-        </div>
-        <button type="button" class="btn btn-primary" style="width:100%;max-width:280px;margin-bottom:10px;padding:14px;" id="att-pdf-dl-main">⬇️ Download PDF</button>
-        <button type="button" class="btn btn-secondary" style="width:100%;max-width:280px;padding:14px;" id="att-pdf-open-btn">📂 Open / Share</button>
-      </div>`;
-  } else {
-    bodyEl.innerHTML = `<div style="color:#ccc;text-align:center;padding:24px;">
-      <div style="font-size:40px;margin-bottom:12px;">📄</div>
-      <div style="font-weight:700;margin-bottom:8px;">${escapeHtml(name)}</div>
-      <div style="font-size:13px;opacity:0.8;margin-bottom:16px;">Preview nahi — Download use karo</div>
-      <button type="button" class="btn btn-primary" id="att-other-dl">⬇️ Download</button>
-    </div>`;
-  }
-  
-  openModal('att-viewer-modal');
-  const ov = document.getElementById('att-viewer-modal');
-  if (ov) {
-    ov.style.zIndex = '9999';
-    ov.classList.add('active');
-  }
-  
-  // Wire PDF / other buttons after DOM insert
-  setTimeout(() => {
-    const openBtn = document.getElementById('att-pdf-open-btn');
-    const dlMain = document.getElementById('att-pdf-dl-main');
-    const otherDl = document.getElementById('att-other-dl');
-    
-    async function doNamedDownload() {
-      const fileName = (att.name && /\.pdf$/i.test(att.name))
-        ? att.name
-        : ((att.name || 'document').replace(/\.pdf$/i, '') + '.pdf');
-      try {
-        let blob = await dataUrlToBlobAsync(dataUrl, 'application/pdf');
-        if (!blob) blob = dataUrlToBlob(dataUrl);
-        if (!blob) throw new Error('blob');
-        blob = new Blob([blob], { type: 'application/pdf' });
-        
-        // Share sheet with real filename (best on Android)
-        if (navigator.share && navigator.canShare) {
-          try {
-            const file = new File([blob], fileName, { type: 'application/pdf' });
-            if (navigator.canShare({ files: [file] })) {
-              await navigator.share({ files: [file], title: fileName });
-              showToast('Share / Save / Open with PDF app');
-              return;
-            }
-          } catch (se) {
-            if (se && se.name === 'AbortError') return;
-          }
-        }
-        
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 15000);
-        showToast('Download: ' + fileName);
-      } catch (err) {
-        console.error(err);
-        showToast('Download fail');
-      }
+  // PDF / text → try open in new tab
+  if (type === 'application/pdf' || type.startsWith('text/') || name.toLowerCase().endsWith('.pdf')) {
+    try {
+      const w = window.open(dataUrl, '_blank');
+      if (!w) downloadAttachment(entryId, attIndex);
+    } catch {
+      downloadAttachment(entryId, attIndex);
     }
-    
-    if (dlMain) dlMain.onclick = function (ev) { if (ev) ev.stopPropagation(); doNamedDownload(); };
-    if (openBtn) openBtn.onclick = function (ev) { if (ev) ev.stopPropagation(); doNamedDownload(); };
-    if (otherDl) otherDl.onclick = function (ev) { if (ev) ev.stopPropagation(); downloadAttachment(entryId, attIndex); };
-    
-    // Footer Download button already wired
-    if (dlBtn) dlBtn.onclick = function (ev) { if (ev) ev.stopPropagation(); doNamedDownload(); };
-  }, 50);
+    return;
+  }
+  
+  // Other files → download (Android will offer open with app)
+  downloadAttachment(entryId, attIndex);
 }
 
 function editFromView() {
-
   closeModal('view-modal');
   const e = entries.find(x => x.id === currentViewId);
   if (!e) return;
@@ -3541,7 +3282,7 @@ async function deleteEntry() {
 
 function goHomeTab() {
   // Close any open modals and stay on home
-  ['entry-modal','view-modal','settings-modal','change-pass-modal','manage-cat-modal','pdf-pick-modal','manage-fields-modal','att-viewer-modal'].forEach(closeModal);
+  ['entry-modal','view-modal','settings-modal','change-pass-modal','manage-cat-modal','pdf-pick-modal','manage-fields-modal'].forEach(closeModal);
   historyBackSafe();
   document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
   const home = document.getElementById('nav-home');
@@ -3704,15 +3445,7 @@ async function exportBackup() {
     a.click();
     URL.revokeObjectURL(url);
     closeModal('settings-modal');
-    let expectedAtt = 0;
-    for (const e of entries) {
-      if (e.attachments) expectedAtt += e.attachments.length;
-    }
-    if (expectedAtt > 0 && attCount === 0) {
-      showToast('⚠️ Backup mein 0 files — attachments IDB mein nahi mile. Pehle same device pe files open karke dekho, phir backup lo.');
-    } else {
-      showToast(`Backup ready! (${attCount} attachments included)`);
-    }
+    showToast(`Backup ready! (${attCount} attachments included)`);
   } catch (err) {
     console.error(err);
     showToast('Backup fail: ' + (err.message || 'error'));
@@ -3750,11 +3483,6 @@ async function importBackup(event) {
     
     if (!confirm(`Backup se ${importedEntries.length} entries restore hongi.${attMsg}\nCurrent data replace ho jaayega. Continue?`)) return;
     
-    if (!masterKey) {
-      showToast('Pehle vault unlock karein, phir restore karein');
-      return;
-    }
-    
     // Restore entries with CURRENT master key (re-encrypt)
     entries = importedEntries;
     
@@ -3762,95 +3490,35 @@ async function importBackup(event) {
     for (const e of entries) {
       if (!e.attachments) continue;
       for (const att of e.attachments) {
-        if (att.data) {
-          const aid = att.id || crypto.randomUUID();
-          att.id = aid;
-          try {
-            await storeAttachmentBlob(aid, att.data);
-          } catch (err) {
-            console.warn('embedded att fail', err);
-          }
-          delete att.data;
+        if (att.data && att.id) {
+          await storeAttachmentBlob(att.id, att.data);
+          delete att.data; // keep only metadata in entry
         }
       }
     }
     
     await persistEntries();
     
-    // Restore attachment files from backup.attachments map
-    // Encrypted with backup password (key) → decrypt → re-encrypt with current masterKey
+    // Restore attachment files:
+    // Blobs in backup are encrypted with backup password (key).
+    // Decrypt with backup key → re-encrypt & store with current masterKey.
     let restoredAtt = 0;
-    let failedAtt = 0;
-    showToast('Attachments restore ho rahe hain...');
     for (const [storeKey, encBlob] of Object.entries(attMap)) {
       try {
-        let dataUrl = null;
-        if (typeof encBlob === 'string' && encBlob.startsWith('data:')) {
-          dataUrl = encBlob;
-        } else if (encBlob && typeof encBlob === 'object' && encBlob.dataUrl) {
-          dataUrl = encBlob.dataUrl;
-        } else if (encBlob && typeof encBlob === 'object' && encBlob.iv && encBlob.data) {
-          const plain = await decryptData(encBlob, key);
-          if (typeof plain === 'string' && plain.startsWith('data:')) dataUrl = plain;
-          else if (plain && typeof plain === 'object') dataUrl = plain.dataUrl || plain.data || null;
-        }
-        if (dataUrl && String(dataUrl).startsWith('data:')) {
-          const attId = String(storeKey).startsWith('att_') ? String(storeKey).slice(4) : String(storeKey);
-          await storeAttachmentBlob(attId, dataUrl);
-          // also store under original key form if different
-          const check = await loadAttachmentBlob(attId);
-          if (check) restoredAtt++;
-          else {
-            // retry raw key
-            await idbSet(String(storeKey).startsWith('att_') ? storeKey : ('att_' + storeKey), await encryptData({ dataUrl }, masterKey));
-            const check2 = await loadAttachmentBlob(attId);
-            if (check2) restoredAtt++;
-            else failedAtt++;
-          }
-        } else {
-          console.warn('No dataUrl for', storeKey, typeof encBlob);
-          failedAtt++;
+        const plain = await decryptData(encBlob, key); // decrypt with backup password key
+        if (plain && plain.dataUrl) {
+          const attId = storeKey.replace(/^att_/, '');
+          await storeAttachmentBlob(attId, plain.dataUrl); // encrypt with current masterKey
+          restoredAtt++;
         }
       } catch (err) {
         console.warn('Attachment restore fail:', storeKey, err);
-        failedAtt++;
-      }
-    }
-    
-    // Second pass: any entry still has embedded .data
-    for (const e of entries) {
-      if (!e.attachments) continue;
-      for (const att of e.attachments) {
-        if (att.data && String(att.data).startsWith('data:')) {
-          try {
-            const aid = att.id || crypto.randomUUID();
-            att.id = aid;
-            await storeAttachmentBlob(aid, att.data);
-            delete att.data;
-            restoredAtt++;
-          } catch (err) { failedAtt++; }
-        }
-      }
-    }
-    await persistEntries();
-    
-    // Count how many entry attachments still missing after restore
-    let missing = 0;
-    for (const e of entries) {
-      if (!e.attachments) continue;
-      for (const att of e.attachments) {
-        if (!att.id) { missing++; continue; }
-        const ok = await loadAttachmentBlob(att.id);
-        if (!ok) missing++;
       }
     }
     
     renderEntries();
     closeModal('settings-modal');
-    let msg = `Restore ho gaya! ${importedEntries.length} entries, ${restoredAtt} files.`;
-    if (failedAtt) msg += ` (${failedAtt} files fail)`;
-    if (missing) msg += ` ⚠️ ${missing} attachment abhi missing — purane device se naya backup lo.`;
-    showToast(msg);
+    showToast(`Restore ho gaya! ${importedEntries.length} entries, ${restoredAtt} files.`);
   } catch (err) {
     console.error(err);
     showToast('Backup file padhne mein error: ' + (err.message || ''));
