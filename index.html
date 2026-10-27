@@ -2092,6 +2092,7 @@ async function loadSettings() {
 // ==================== BIOMETRIC (WebAuthn) ====================
 const BIO_CRED_KEY = 'bio_credential_id';
 const BIO_ENABLED_KEY = 'bio_enabled';
+const BIO_WRAP_KEY = 'bio_wrap_secret';
 
 async function isBiometricAvailable() {
   if (!window.PublicKeyCredential) return false;
@@ -2118,7 +2119,7 @@ async function checkBiometricSupport() {
   }
   if (statusText) {
     if (!available) statusText.textContent = 'Is device pe biometric support nahi hai';
-    else if (enabled) statusText.textContent = 'Fingerprint / Face unlock ON hai';
+    else if (enabled) statusText.textContent = 'ON — fingerprint se seedha unlock';
     else statusText.textContent = 'Biometric enable karein';
   }
 }
@@ -2212,9 +2213,19 @@ async function toggleBiometricSetting() {
       
       const credId = bufToBase64(credential.rawId);
       await idbSet(BIO_CRED_KEY, credId);
+      // Save wrapped password so fingerprint can unlock without typing password again
+      const wrapKeyBytes = crypto.getRandomValues(new Uint8Array(32));
+      const wrapKey = await crypto.subtle.importKey(
+        'raw', wrapKeyBytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']
+      );
+      const wrapped = await encryptData({ password: pass }, wrapKey);
+      await idbSet(BIO_WRAP_KEY, {
+        wrapKey: bufToBase64(wrapKeyBytes),
+        payload: wrapped
+      });
       await idbSet(BIO_ENABLED_KEY, true);
       
-      showToast('Fingerprint / Face Unlock ON ho gaya!');
+      showToast('Fingerprint ON — ab password ke bina unlock hoga');
       checkBiometricSupport();
     } catch (err) {
       console.error(err);
@@ -2236,6 +2247,7 @@ async function toggleBiometricSetting() {
   } else {
     await idbSet(BIO_ENABLED_KEY, false);
     try { await idbDelete(BIO_CRED_KEY); } catch(e) {}
+    try { await idbDelete(BIO_WRAP_KEY); } catch(e) {}
     showToast('Biometric unlock OFF kar diya');
     checkBiometricSupport();
   }
@@ -2244,6 +2256,7 @@ async function toggleBiometricSetting() {
 async function tryBiometric() {
   const enabled = await idbGet(BIO_ENABLED_KEY);
   const credIdB64 = await idbGet(BIO_CRED_KEY);
+  const wrap = await idbGet(BIO_WRAP_KEY);
   
   if (!enabled || !credIdB64) {
     showToast('Pehle Settings se Biometric enable karein');
@@ -2251,6 +2264,7 @@ async function tryBiometric() {
   }
   
   try {
+    showToast('Fingerprint verify ho raha hai...');
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     const credId = base64ToBuf(credIdB64);
     
@@ -2267,22 +2281,55 @@ async function tryBiometric() {
       }
     });
     
-    if (assertion) {
-      // Biometric successful.
-      // Note: Pure client-side WebAuthn does not give us the encryption key.
-      // We still need the master password once per browser session for full security.
-      // For convenience we prompt password only if needed, but here we ask user
-      // to enter password after successful biometric as extra confirmation,
-      // OR we can auto-focus password field.
-      
-      showToast('Biometric verified! Ab Master Password daalein');
-      const passInput = document.getElementById('login-password');
-      if (passInput) {
-        passInput.focus();
-        // Optional: some users want full passwordless. 
-        // True passwordless needs PRF extension which is not universal yet.
-      }
+    if (!assertion) {
+      showToast('Biometric fail');
+      return;
     }
+    
+    if (!wrap || !wrap.wrapKey || !wrap.payload) {
+      showToast('Biometric data purana hai. Settings → OFF → ON karke set karo');
+      document.getElementById('login-password')?.focus();
+      return;
+    }
+    
+    const wrapKey = await crypto.subtle.importKey(
+      'raw', base64ToBuf(wrap.wrapKey), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']
+    );
+    const plain = await decryptData(wrap.payload, wrapKey);
+    const pass = plain && plain.password;
+    if (!pass) {
+      showToast('Biometric secret invalid. Settings se phir enable karo');
+      return;
+    }
+    
+    const saltB64 = await idbGet(SALT_KEY);
+    const verifier = await idbGet(VERIFIER_KEY);
+    if (!saltB64 || !verifier) {
+      showToast('Vault setup incomplete');
+      return;
+    }
+    const salt = base64ToBuf(saltB64);
+    const key = await deriveKey(pass, salt);
+    if (!(await verifyPassword(key, verifier))) {
+      showToast('Mismatch. Settings se Biometric OFF→ON karo');
+      try { await idbDelete(BIO_WRAP_KEY); } catch (e) {}
+      return;
+    }
+    
+    masterKey = key;
+    const encryptedEntries = await idbGet('entries');
+    if (encryptedEntries) {
+      try { entries = await decryptData(encryptedEntries, masterKey); }
+      catch (e) { entries = []; }
+    } else {
+      entries = [];
+    }
+    if (!Array.isArray(entries)) entries = [];
+    
+    showToast('Fingerprint se unlock ho gaya!');
+    showMainApp();
+    buildFilterChips();
+    renderEntries();
   } catch (err) {
     console.error(err);
     if (err.name === 'NotAllowedError') {
@@ -3369,8 +3416,15 @@ async function changeMasterPassword() {
   await idbSet('entries', reEncrypted);
   masterKey = newKey;
   
+  try {
+    await idbSet(BIO_ENABLED_KEY, false);
+    await idbDelete(BIO_CRED_KEY);
+    await idbDelete(BIO_WRAP_KEY);
+  } catch (e) {}
+  
   closeModal('change-pass-modal');
-  showToast('Master Password successfully change ho gaya!');
+  showToast('Password change ho gaya. Biometric OFF — Settings se phir ON karo.');
+  checkBiometricSupport();
 }
 
 // --- Backup ---
